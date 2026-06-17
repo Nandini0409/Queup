@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   X,
   ExternalLink,
@@ -5,6 +6,8 @@ import {
 } from "lucide-react";
 
 import StatusBadge from "../StatusBadge";
+
+import toast from "react-hot-toast";
 
 import { getLeadActionInfo } from "../../utils/getLeadActionInfo";
 
@@ -39,9 +42,15 @@ function LeadHeader({
   onClose,
   onLeadUpdated,
   onActivitiesUpdated,
+  onLeadStatusChanged,
 }) {
+  const [updating, setUpdating] =
+    useState(false);
+
   async function handleMarkInterested() {
     try {
+      setUpdating(true);
+
       const updatedLead =
         await markLeadInterested(
           lead.id
@@ -59,11 +68,24 @@ function LeadHeader({
         );
 
       onLeadUpdated(updatedLead);
+      if (onLeadStatusChanged) {
+        onLeadStatusChanged(updatedLead);
+      }
       onActivitiesUpdated(
         activities
       );
+
+      toast.success(
+        "Lead marked as interested"
+      );
     } catch (error) {
       console.error(error);
+
+      toast.error(
+        "Failed to update lead"
+      );
+    } finally {
+      setUpdating(false);
     }
   }
 
@@ -84,8 +106,7 @@ function LeadHeader({
 
   return (
     <>
-      {/* Header */}
-
+      {/* HEADER */}
       <div className="flex items-start justify-between">
         <div>
           <h2
@@ -120,7 +141,7 @@ function LeadHeader({
           className="
             rounded-xl
             p-2
-            transition-all
+            transition
             hover:bg-slate-100
           "
         >
@@ -128,8 +149,7 @@ function LeadHeader({
         </button>
       </div>
 
-      {/* Next Action */}
-
+      {/* NEXT ACTION */}
       <div
         className="
           mt-8
@@ -176,61 +196,57 @@ function LeadHeader({
         )}
       </div>
 
-      {/* Buttons */}
+      {/* ACTIONS */}
+      <div className="mt-6 flex flex-wrap gap-3">
 
-      <div className="mt-6 flex gap-3">
         <a
           href={lead.profile_url}
           target="_blank"
           rel="noreferrer"
           className="
-            flex
-            items-center
-            gap-2
+            flex items-center gap-2
             rounded-xl
-            border
-            border-[var(--color-border)]
-            px-4
-            py-2.5
-            text-sm
-            font-medium
-            transition-all
+            border border-[var(--color-border)]
+            px-4 py-2.5
+            text-sm font-medium
+            transition
             hover:border-[var(--color-primary)]
             hover:bg-slate-50
           "
         >
           <ExternalLink size={16} />
-          Open Profile
+          View LinkedIn Profile
         </a>
 
         {lead.status !==
           "interested" && (
-          <button
-            onClick={
-              handleMarkInterested
-            }
-            className="
-              flex
-              items-center
-              gap-2
-              rounded-xl
-              bg-[var(--color-primary)]
-              px-4
-              py-2.5
-              text-sm
-              font-medium
-              text-white
-              transition-all
-              hover:-translate-y-0.5
-              hover:shadow-md
-            "
-          >
-            <CheckCircle2
-              size={16}
-            />
-            Mark Interested
-          </button>
-        )}
+            <button
+              onClick={
+                handleMarkInterested
+              }
+              disabled={updating}
+              className="
+                flex items-center gap-2
+                rounded-xl
+                bg-[var(--color-primary)]
+                px-4 py-2.5
+                text-sm font-medium
+                text-white
+                transition
+                hover:shadow-md
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              <CheckCircle2
+                size={16}
+              />
+
+              {updating
+                ? "Updating..."
+                : "Mark Interested"}
+            </button>
+          )}
       </div>
     </>
   );

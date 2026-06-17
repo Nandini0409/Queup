@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 
+import toast from "react-hot-toast";
+
 import { useCurrentUser } from "../../hooks/useCurrentUser";
+
+import LeadDrawer from "../drawer/LeadDrawer";
+import FollowUpSection from "./FollowupSection";
+import { LEAD_STATUS } from "../../constants/leadStatus";
 
 import {
   getFollowUpsDueToday,
@@ -16,74 +22,128 @@ import {
   saveTemplate,
 } from "../../services/templates";
 
+
+
+
+function FollowUpSectionSkeleton() {
+  return (
+    <div
+      className="
+        rounded-2xl bg-white
+        border border-[var(--color-border)]
+        overflow-hidden
+      "
+    >
+      {/* header */}
+      <div className="px-5 py-4">
+        <div className="h-5 w-40 rounded bg-slate-200 animate-pulse" />
+      </div>
+
+      <div className="h-px bg-[var(--color-border)]" />
+
+      {[1, 2, 3].map((item) => (
+        <div
+          key={item}
+          className="
+            flex items-center justify-between
+            px-5 py-4
+            border-b border-[var(--color-border)]
+          "
+        >
+          <div>
+            <div className="h-4 w-32 rounded bg-slate-200 animate-pulse" />
+            <div className="mt-2 h-3 w-40 rounded bg-slate-100 animate-pulse" />
+          </div>
+
+          <div className="flex gap-2">
+            <div className="h-8 w-16 rounded-lg bg-slate-200 animate-pulse" />
+            <div className="h-8 w-16 rounded-lg bg-slate-200 animate-pulse" />
+            <div className="h-8 w-24 rounded-lg bg-slate-200 animate-pulse" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
+
+
+
+
+
 function FollowUpsTab() {
   const user = useCurrentUser();
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [followup1Leads, setFollowup1Leads] = useState([]);
+  const [followup2Leads, setFollowup2Leads] = useState([]);
+  const [finalLeads, setFinalLeads] = useState([]);
+  const [followup1Template, setFollowup1Template] = useState("");
+  const [followup2Template, setFollowup2Template] = useState("");
+  const [finalTemplate, setFinalTemplate] = useState("");
+  const [savingTemplateId, setSavingTemplateId] = useState(null);
+  const [loadingLeadId, setLoadingLeadId] = useState(null);
 
-  const [
-    followup1Leads,
-    setFollowup1Leads,
-  ] = useState([]);
+  const followupSections = [
+    {
+      id: "followup1",
+      title: "Follow Up 1",
+      leads: followup1Leads,
+      setLeads: setFollowup1Leads,
+      status: "initial_message_sent",
+      doneType: "follow_up_1_sent",
+      api: markFollowup1Sent,
+      template: followup1Template,
+      setTemplate: setFollowup1Template,
+      templateKey: "followup1",
+    },
+    {
+      id: "followup2",
+      title: "Follow Up 2",
+      leads: followup2Leads,
+      setLeads: setFollowup2Leads,
+      status: "follow_up_1_sent",
+      doneType: "follow_up_2_sent",
+      api: markFollowup2Sent,
+      template: followup2Template,
+      setTemplate: setFollowup2Template,
+      templateKey: "followup2",
+    },
+    {
+      id: "final",
+      title: "Final Follow Up",
+      leads: finalLeads,
+      setLeads: setFinalLeads,
+      status: "follow_up_2_sent",
+      doneType: "final_follow_up_sent",
+      api: markFinalFollowupSent,
+      template: finalTemplate,
+      setTemplate: setFinalTemplate,
+      templateKey: "final_followup",
+    },
+  ];
 
-  const [
-    followup2Leads,
-    setFollowup2Leads,
-  ] = useState([]);
-
-  const [
-    finalLeads,
-    setFinalLeads,
-  ] = useState([]);
-
-  const [
-    followup1Template,
-    setFollowup1Template,
-  ] = useState("");
-
-  const [
-    followup2Template,
-    setFollowup2Template,
-  ] = useState("");
-
-  const [
-    finalTemplate,
-    setFinalTemplate,
-  ] = useState("");
+  const defaultTemplates = {
+    followup1: `Hi {{firstName}},\n\nJust following up on my previous message.`,
+    followup2: `Hi {{firstName}},\n\nWanted to check if you had a chance to see my last message.`,
+    final_followup: `Hi {{firstName}},\n\nJust sending one final follow up.`,
+  };
 
   useEffect(() => {
     if (!user) return;
 
     async function loadLeads() {
       try {
-        const leads =
-          await getFollowUpsDueToday(
-            user.id
-          );
-
-        setFollowup1Leads(
-          leads.filter(
-            (lead) =>
-              lead.status ===
-              "initial_message_sent"
-          )
-        );
-
-        setFollowup2Leads(
-          leads.filter(
-            (lead) =>
-              lead.status ===
-              "followup1_sent"
-          )
-        );
-
-        setFinalLeads(
-          leads.filter(
-            (lead) =>
-              lead.status ===
-              "followup2_sent"
-          )
-        );
+        setLoading(true);
+        const leads = await getFollowUpsDueToday(user.id);
+        setFollowup1Leads(leads.filter((lead) => lead.status === "initial_message_sent"));
+        setFollowup2Leads(leads.filter((lead) => lead.status === "follow_up_1_sent"));
+        setFinalLeads(leads.filter((lead) => lead.status === "follow_up_2_sent"));
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -95,445 +155,181 @@ function FollowUpsTab() {
 
     async function loadTemplates() {
       try {
-        const followup1 =
-          await getTemplate(
-            user.id,
-            "followup1"
-          );
+        const [f1, f2, f3] = await Promise.all([
+          getTemplate(user.id, "followup1"),
+          getTemplate(user.id, "followup2"),
+          getTemplate(user.id, "final_followup"),
+        ]);
 
-        const followup2 =
-          await getTemplate(
-            user.id,
-            "followup2"
-          );
-
-        const finalFollowup =
-          await getTemplate(
-            user.id,
-            "final_followup"
-          );
-
-        setFollowup1Template(
-          followup1?.content ||
-            `Hi {{firstName}},
-
-Just following up on my previous message.`
-        );
-
-        setFollowup2Template(
-          followup2?.content ||
-            `Hi {{firstName}},
-
-Wanted to check back one more time.`
-        );
-
-        setFinalTemplate(
-          finalFollowup?.content ||
-            `Hi {{firstName}},
-
-This will be my last follow up.`
-        );
+        setFollowup1Template(f1?.content || defaultTemplates.followup1);
+        setFollowup2Template(f2?.content || defaultTemplates.followup2);
+        setFinalTemplate(f3?.content || defaultTemplates.final_followup);
       } catch (error) {
         console.error(error);
+        toast.error("Failed to load templates");
       }
     }
 
     loadTemplates();
   }, [user]);
 
-  const handleSaveFollowup1 =
-    async () => {
-      try {
-        await saveTemplate(
-          user.id,
-          "followup1",
-          followup1Template
-        );
-      } catch (error) {
-        console.error(error);
+
+  function handleLeadStatusChanged(
+    updatedLead
+  ) {
+    if (
+      updatedLead.status !==
+      LEAD_STATUS.INTERESTED
+    ) {
+      return;
+    }
+
+    setFollowup1Leads((prev) =>
+      prev.filter(
+        (lead) =>
+          lead.id !== updatedLead.id
+      )
+    );
+
+    setFollowup2Leads((prev) =>
+      prev.filter(
+        (lead) =>
+          lead.id !== updatedLead.id
+      )
+    );
+
+    setFinalLeads((prev) =>
+      prev.filter(
+        (lead) =>
+          lead.id !== updatedLead.id
+      )
+    );
+  }
+
+
+  async function saveTemplateHandler(type, template) {
+    try {
+      setSavingTemplateId(type);
+
+      if (!template.includes("{{firstName}}")) {
+        toast("Template saved, but it doesn't include {{firstName}}", {
+          icon: "⚠️",
+        });
       }
-    };
 
-  const handleSaveFollowup2 =
-    async () => {
-      try {
-        await saveTemplate(
-          user.id,
-          "followup2",
-          followup2Template
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      await saveTemplate(user.id, type, template);
+      toast.success("Template saved");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save template");
+    } finally {
+      setSavingTemplateId(null);
+    }
+  }
 
-  const handleSaveFinal =
-    async () => {
-      try {
-        await saveTemplate(
-          user.id,
-          "final_followup",
-          finalTemplate
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  async function copyMessage(lead, template) {
+    try {
+      const firstName = lead.name.split(" ")[0];
+      const message = template.replace("{{firstName}}", firstName);
+      await navigator.clipboard.writeText(message);
+      toast.success("Message copied");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to copy message");
+    }
+  }
 
-  const copyTemplateMessage =
-    async (
-      template,
-      lead
-    ) => {
-      try {
-        const firstName =
-          lead.name.split(
-            " "
-          )[0];
+  async function markDone(lead, section) {
+    const config = followupSections.find((item) => item.id === section);
+    if (!config) return;
 
-        const message =
-          template.replace(
-            "{{firstName}}",
-            firstName
-          );
+    try {
+      setLoadingLeadId(lead.id);
 
-        await navigator.clipboard.writeText(
-          message
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      await config.api(lead.id);
 
-  const handleFollowup1Done =
-    async (lead) => {
-      try {
-        await markFollowup1Sent(
-          lead.id
-        );
+      config.setLeads((prev) =>
+        prev.filter((item) => item.id !== lead.id)
+      );
 
-        await createActivity(
-          user.id,
-          lead.id,
-          "followup1_sent"
-        );
+      await createActivity(
+        user.id,
+        lead.id,
+        config.doneType
+      );
 
-        setFollowup1Leads(
-          (prev) =>
-            prev.filter(
-              (item) =>
-                item.id !== lead.id
-            )
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      toast.success("Follow up completed");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update lead");
+    } finally {
+      setLoadingLeadId(null);
+    }
+  }
 
-  const handleFollowup2Done =
-    async (lead) => {
-      try {
-        await markFollowup2Sent(
-          lead.id
-        );
+  const hasAnyFollowups =
+    followup1Leads.length > 0 ||
+    followup2Leads.length > 0 ||
+    finalLeads.length > 0;
 
-        await createActivity(
-          user.id,
-          lead.id,
-          "followup2_sent"
-        );
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
-        setFollowup2Leads(
-          (prev) =>
-            prev.filter(
-              (item) =>
-                item.id !== lead.id
-            )
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-  const handleFinalDone =
-    async (lead) => {
-      try {
-        await markFinalFollowupSent(
-          lead.id
-        );
-
-        await createActivity(
-          user.id,
-          lead.id,
-          "final_followup_sent"
-        );
-
-        setFinalLeads(
-          (prev) =>
-            prev.filter(
-              (item) =>
-                item.id !== lead.id
-            )
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  if (!hasAnyFollowups) {
+    return (
+      <div className="rounded-xl border border-[var(--color-border)] bg-white p-8 text-center">
+        <h3 className="mt-3 font-semibold text-[var(--color-text)]">You're all caught up</h3>
+        <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+          No follow ups need attention today.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h2>
-        Today's Follow Ups
-      </h2>
+    <div className="space-y-10">
+      {followupSections.map((section) =>
+        section.leads.length > 0 ? (
+          <FollowUpSection
+            key={section.id}
 
-      <hr />
+            sectionId={section.id}
 
-      <section>
-        <h3>
-          Follow Up 1 (
-          {
-            followup1Leads.length
-          }{" "}
-          Due Today)
-        </h3>
+            title={section.title}
+            template={section.template}
+            setTemplate={section.setTemplate}
+            leads={section.leads}
 
-        <textarea
-          rows={5}
-          value={
-            followup1Template
-          }
-          onChange={(e) =>
-            setFollowup1Template(
-              e.target.value
-            )
-          }
-        />
+            onSave={() =>
+              saveTemplateHandler(section.templateKey, section.template)
+            }
 
-        <button
-          onClick={
-            handleSaveFollowup1
-          }
-        >
-          Save Template
-        </button>
+            onCopy={(lead) =>
+              copyMessage(lead, section.template)
+            }
 
-        {followup1Leads.length ===
-          0 && (
-          <p>
-            No Follow Up 1s due
-            today.
-          </p>
-        )}
+            onDone={(lead) =>
+              markDone(lead, section.id)
+            }
 
-        {followup1Leads.map(
-          (lead) => (
-            <div
-              key={lead.id}
-            >
-              <h4>
-                {lead.name}
-              </h4>
+            onView={setSelectedLead}
 
-              <button
-                onClick={() =>
-                  copyTemplateMessage(
-                    followup1Template,
-                    lead
-                  )
-                }
-              >
-                Copy Message
-              </button>
+            saving={savingTemplateId === section.templateKey}
+            loadingLeadId={loadingLeadId}
+          />
+        ) : null
+      )}
 
-              <a
-                href={
-                  lead.profile_url
-                }
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open LinkedIn
-              </a>
-
-              <button
-                onClick={() =>
-                  handleFollowup1Done(
-                    lead
-                  )
-                }
-              >
-                Done
-              </button>
-
-              <hr />
-            </div>
-          )
-        )}
-      </section>
-
-      <section>
-        <h3>
-          Follow Up 2 (
-          {
-            followup2Leads.length
-          }{" "}
-          Due Today)
-        </h3>
-
-        <textarea
-          rows={5}
-          value={
-            followup2Template
-          }
-          onChange={(e) =>
-            setFollowup2Template(
-              e.target.value
-            )
-          }
-        />
-
-        <button
-          onClick={
-            handleSaveFollowup2
-          }
-        >
-          Save Template
-        </button>
-
-        {followup2Leads.length ===
-          0 && (
-          <p>
-            No Follow Up 2s due
-            today.
-          </p>
-        )}
-
-        {followup2Leads.map(
-          (lead) => (
-            <div
-              key={lead.id}
-            >
-              <h4>
-                {lead.name}
-              </h4>
-
-              <button
-                onClick={() =>
-                  copyTemplateMessage(
-                    followup2Template,
-                    lead
-                  )
-                }
-              >
-                Copy Message
-              </button>
-
-              <a
-                href={
-                  lead.profile_url
-                }
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open LinkedIn
-              </a>
-
-              <button
-                onClick={() =>
-                  handleFollowup2Done(
-                    lead
-                  )
-                }
-              >
-                Done
-              </button>
-
-              <hr />
-            </div>
-          )
-        )}
-      </section>
-
-      <section>
-        <h3>
-          Final Follow Up (
-          {
-            finalLeads.length
-          }{" "}
-          Due Today)
-        </h3>
-
-        <textarea
-          rows={5}
-          value={finalTemplate}
-          onChange={(e) =>
-            setFinalTemplate(
-              e.target.value
-            )
-          }
-        />
-
-        <button
-          onClick={
-            handleSaveFinal
-          }
-        >
-          Save Template
-        </button>
-
-        {finalLeads.length ===
-          0 && (
-          <p>
-            No Final Follow Ups
-            due today.
-          </p>
-        )}
-
-        {finalLeads.map(
-          (lead) => (
-            <div
-              key={lead.id}
-            >
-              <h4>
-                {lead.name}
-              </h4>
-
-              <button
-                onClick={() =>
-                  copyTemplateMessage(
-                    finalTemplate,
-                    lead
-                  )
-                }
-              >
-                Copy Message
-              </button>
-
-              <a
-                href={
-                  lead.profile_url
-                }
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open LinkedIn
-              </a>
-
-              <button
-                onClick={() =>
-                  handleFinalDone(
-                    lead
-                  )
-                }
-              >
-                Done
-              </button>
-
-              <hr />
-            </div>
-          )
-        )}
-      </section>
+      {selectedLead && <LeadDrawer
+        lead={selectedLead}
+        onClose={() =>
+          setSelectedLead(null)
+        }
+        onLeadStatusChanged={
+          handleLeadStatusChanged
+        }
+      />}
     </div>
   );
 }

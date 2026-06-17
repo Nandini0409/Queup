@@ -1,292 +1,188 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, UserPlus } from "lucide-react";
 
 import { useAddLead } from "../hooks/useAddLead";
+import { validateLead } from "../utils/validateLead";
 
-function AddLeadModal({
-  userId,
-  onClose,
-  onLeadCreated,
-}) {
-  const [name, setName] =
-    useState("");
+function AddLeadModal({ userId, onClose, onLeadCreated }) {
+  const [formData, setFormData] = useState({
+    name: "",
+    profileUrl: "",
+    notes: "",
+  });
 
-  const [profileUrl, setProfileUrl] =
-    useState("");
+  const [errors, setErrors] = useState({});
+  const { addLead, loading } = useAddLead();
+  const inputClass =
+    "mt-2 w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[rgba(24,27,58,0.12)]";
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
-  const [notes, setNotes] =
-    useState("");
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
 
-  const {
-    addLead,
-    loading,
-    error,
-  } = useAddLead();
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
+  const isFormValid =
+    formData.name.trim() && formData.profileUrl.trim();
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!name.trim()) return;
-    if (!profileUrl.trim()) return;
+    const validationErrors = validateLead(
+      formData.name,
+      formData.profileUrl
+    );
+
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors);
+      return;
+    }
 
     try {
-      const lead = await addLead(
-        userId,
-        {
-          name,
-          profileUrl,
-          notes,
-        }
-      );
+      const lead = await addLead(userId, {
+        name: formData.name.trim(),
+        profileUrl: formData.profileUrl.trim(),
+        notes: formData.notes.trim(),
+      });
 
       onLeadCreated?.(lead);
-
       onClose();
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   }
 
   return (
     <>
-      {/* Overlay */}
+      {/* BACKDROP */}
       <div
-        className="
-          fixed
-          inset-0
-          z-40
-          bg-black/40
-          backdrop-blur-sm
-        "
         onClick={onClose}
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
       />
 
-      {/* Modal */}
-      <div
-        className="
-          fixed
-          left-1/2
-          top-1/2
-          z-50
-          w-full
-          max-w-[640px]
-          -translate-x-1/2
-          -translate-y-1/2
-          rounded-3xl
-          border
-          bg-[var(--color-card)]
-          border-[var(--color-border)]
-          shadow-2xl
-        "
-      >
-        {/* Header */}
-        <div
-          className="
-            flex
-            items-start
-            justify-between
-            border-b
-            border-[var(--color-border)]
-            px-8
-            py-6
-          "
-        >
-          <div>
-            <h2
-              className="
-                text-2xl
-                font-bold
-                text-[var(--color-text)]
-              "
-            >
-              Add Lead
-            </h2>
+      {/* MODAL */}
+      <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-3xl border border-[var(--color-border)] bg-white shadow-2xl overflow-hidden">
 
-            <p
-              className="
-                mt-2
-                text-sm
-                text-[var(--color-text-secondary)]
-              "
-            >
-              Add a new person to your outreach queue.
-            </p>
+        {/* HEADER */}
+        <div className="flex items-start justify-between border-b border-[var(--color-border)] px-7 py-6">
+
+          <div className="flex items-center gap-3">
+
+            <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-[rgba(24,27,58,0.06)] text-[var(--color-primary)]">
+              <UserPlus size={18} />
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-[var(--color-primary)]">
+                Add Lead
+              </h2>
+              <p className="text-sm text-[var(--color-text-secondary)] mt-1">
+                Add someone to your outreach pipeline
+              </p>
+            </div>
+
           </div>
 
           <button
             onClick={onClose}
-            className="
-              rounded-xl
-              p-2
-              text-[var(--color-text-secondary)]
-              transition
-              hover:bg-[var(--color-bg)]
-            "
+            className="rounded-xl p-2 hover:bg-slate-200 transition"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="p-8"
-        >
-          <div className="space-y-6">
-            {/* Name */}
-            <div>
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-[var(--color-text)]
-                "
-              >
-                Lead Name
-              </label>
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="p-7 space-y-6">
 
-              <input
-                value={name}
-                onChange={(e) =>
-                  setName(e.target.value)
-                }
-                placeholder="John Smith"
-                className="
-                  w-full
-                  rounded-xl
-                  border
-                  border-[var(--color-border)]
-                  bg-white
-                  px-4
-                  py-3
-                  text-[var(--color-text)]
-                  outline-none
-                  transition
-                  focus:border-[var(--color-accent)]
-                "
-              />
-            </div>
+          {/* LEAD NAME */}
+          <div>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              Lead Name
+            </label>
 
-            {/* Profile URL */}
-            <div>
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-[var(--color-text)]
-                "
-              >
-                Profile URL
-              </label>
+            <input
+              autoFocus
+              value={formData.name}
+              onChange={(e) =>
+                handleInputChange("name", e.target.value)
+              }
+              placeholder="John Smith"
+              className={inputClass}
+            />
 
-              <input
-                value={profileUrl}
-                onChange={(e) =>
-                  setProfileUrl(
-                    e.target.value
-                  )
-                }
-                placeholder="https://linkedin.com/in/..."
-                className="
-                  w-full
-                  rounded-xl
-                  border
-                  border-[var(--color-border)]
-                  bg-white
-                  px-4
-                  py-3
-                  text-[var(--color-text)]
-                  outline-none
-                  transition
-                  focus:border-[var(--color-accent)]
-                "
-              />
-            </div>
-
-            {/* Notes */}
-            <div>
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                  text-[var(--color-text)]
-                "
-              >
-                Notes
-              </label>
-
-              <textarea
-                value={notes}
-                onChange={(e) =>
-                  setNotes(e.target.value)
-                }
-                placeholder="Anything important about this lead..."
-                className="
-                  min-h-[160px]
-                  w-full
-                  resize-none
-                  rounded-xl
-                  border
-                  border-[var(--color-border)]
-                  bg-white
-                  px-4
-                  py-3
-                  text-[var(--color-text)]
-                  outline-none
-                  transition
-                  focus:border-[var(--color-accent)]
-                "
-              />
-            </div>
-
-            {error && (
-              <div
-                className="
-                  rounded-xl
-                  border
-                  border-red-200
-                  bg-red-50
-                  p-3
-                "
-              >
-                <p className="text-sm text-red-600">
-                  {error}
-                </p>
-              </div>
+            {errors.name && (
+              <p className="mt-2 text-sm text-red-600">
+                {errors.name}
+              </p>
             )}
           </div>
 
-          {/* Footer */}
-          <div
-            className="
-              mt-8
-              flex
-              justify-end
-              gap-3
-              border-t
-              border-[var(--color-border)]
-              pt-6
-            "
-          >
+          {/* PROFILE URL */}
+          <div>
+            <label className="text-sm font-medium text-[var(--color-primary)]">
+              Profile URL
+            </label>
+
+            <input
+              value={formData.profileUrl}
+              onChange={(e) =>
+                handleInputChange("profileUrl", e.target.value)
+              }
+              placeholder="https://linkedin.com/in/john"
+              className={inputClass}
+            />
+
+            {errors.profile && (
+              <p className="mt-2 text-sm text-red-600">
+                {errors.profile}
+              </p>
+            )}
+          </div>
+
+          {/* NOTES */}
+          <div>
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-medium text-[var(--color-primary)]">
+                Notes
+              </label>
+
+              <span className="text-xs text-[var(--color-text-secondary)]">
+                {formData.notes.length}/500
+              </span>
+            </div>
+
+            <textarea
+              value={formData.notes}
+              maxLength={500}
+              onChange={(e) =>
+                handleInputChange("notes", e.target.value)
+              }
+              onKeyDown={handleKeyDown}
+              placeholder="Context, personalization ideas, etc..."
+              className={`${inputClass} min-h-[120px] resize-none`}
+            />
+          </div>
+
+          {/* FOOTER */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
+
             <button
               type="button"
               onClick={onClose}
               className="
-                rounded-xl
-                border
-                border-[var(--color-border)]
-                px-5
-                py-2.5
-                font-medium
-                text-[var(--color-text)]
+                rounded-xl border border-[var(--color-border)]
+                px-5 py-2.5 text-sm
+                hover:bg-slate-50
                 transition
-                hover:bg-[var(--color-bg)]
+                cursor-pointer
               "
             >
               Cancel
@@ -294,24 +190,20 @@ function AddLeadModal({
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isFormValid}
               className="
-                rounded-xl
-                bg-[var(--color-primary)]
-                px-5
-                py-2.5
-                font-medium
-                text-white
-                transition
+                rounded-xl bg-[var(--color-primary)]
+                px-5 py-2.5 text-sm text-white
+                disabled:opacity-50 disabled:cursor-not-allowed
                 hover:opacity-90
-                disabled:opacity-50
+                transition
               "
             >
-              {loading
-                ? "Adding..."
-                : "Add Lead"}
+              {loading ? "Adding..." : "Add Lead"}
             </button>
+
           </div>
+
         </form>
       </div>
     </>

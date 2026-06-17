@@ -17,7 +17,7 @@ const subtitleColors = {
     "text-red-500 font-medium",
 
   success:
-    "text-green-600 font-medium",
+    "text-[var(--color-text-secondary)]",
 
   info:
     "text-[var(--color-text-secondary)]",
@@ -34,94 +34,104 @@ function LeadCard({
     <div
       onClick={onClick}
       className="
-        group
-        relative
         cursor-pointer
-        overflow-hidden
         rounded-2xl
         border
         border-[var(--color-border)]
         bg-[var(--color-card)]
+        px-6
+        py-5
         transition-all
         duration-200
-        hover:-translate-y-1
         hover:border-[var(--color-accent)]
-        hover:shadow-lg
+        hover:bg-white
+        hover:shadow-md
       "
     >
       <div
         className="
-          absolute
-          left-0
-          top-0
-          h-full
-          w-1
-          bg-[var(--color-accent)]
+          grid
+          grid-cols-[240px_1fr_auto]
+          items-start
+          gap-8
         "
-      />
+      >
+        {/* NAME */}
 
-      <div className="p-5 pl-6">
-        <div className="flex justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h3
+        <div className="min-w-0">
+          <h3
+            className="
+              truncate
+              text-lg
+              font-semibold
+              text-[var(--color-text)]
+            "
+          >
+            {lead.name}
+          </h3>
+        </div>
+
+        {/* NEXT ACTION */}
+
+        <div className="min-w-0">
+          <div
+            className="
+              flex
+              items-center
+              gap-2
+              text-sm
+              font-medium
+              text-[var(--color-primary)]
+            "
+          >
+            <ArrowRight
+              size={14}
               className="
-                truncate
-                text-lg
-                font-semibold
-                text-[var(--color-text)]
+                shrink-0
+                text-[var(--color-accent)]
               "
-            >
-              {lead.name}
-            </h3>
+            />
 
+            <span className="truncate">
+              {actionInfo.title}
+            </span>
+          </div>
+
+          {actionInfo.subtitle && (
             <div
-              className="
-                mt-3
+              className={`
+                mt-2
                 flex
                 items-center
                 gap-2
-                text-sm
-                font-medium
-                text-[var(--color-primary)]
-              "
+                text-xs
+                ${subtitleColors[actionInfo.type]}
+              `}
             >
-              <ArrowRight
-                size={14}
-                className="
-                  text-[var(--color-accent)]
-                "
+              <Clock3
+                size={12}
+                className="shrink-0"
               />
 
-              <span>
-                {actionInfo.title}
+              <span className="truncate">
+                {actionInfo.subtitle}
               </span>
             </div>
+          )}
+        </div>
 
-            {actionInfo.subtitle && (
-              <div
-                className={`
-                  mt-2
-                  flex
-                  items-center
-                  gap-2
-                  text-xs
-                  ${subtitleColors[actionInfo.type]}
-                `}
-              >
-                <Clock3 size={12} />
+        {/* STATUS */}
 
-                <span>
-                  {actionInfo.subtitle}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="shrink-0">
-            <StatusBadge
-              status={lead.status}
-            />
-          </div>
+        <div
+          className="
+            flex
+            items-start
+            justify-end
+          "
+        >
+          <StatusBadge
+            status={lead.status}
+          />
         </div>
       </div>
     </div>

@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   updateLeadNotes,
 } from "../../services/leads";
+
+import toast from "react-hot-toast";
 
 import {
   createActivity,
@@ -20,8 +22,17 @@ function LeadNotes({
   const [notes, setNotes] =
     useState(lead.notes || "");
 
+  const [saving, setSaving] =
+    useState(false);
+
+  useEffect(() => {
+    setNotes(lead.notes || "");
+  }, [lead]);
+
   async function handleSaveNotes() {
     try {
+      setSaving(true);
+
       const updatedLead =
         await updateLeadNotes(
           lead.id,
@@ -40,13 +51,24 @@ function LeadNotes({
         );
 
       onLeadUpdated(updatedLead);
+
       onActivitiesUpdated(
         activities
       );
 
       setIsEditingNotes(false);
+
+      toast.success(
+        "Notes updated"
+      );
     } catch (error) {
       console.error(error);
+
+      toast.error(
+        "Failed to update notes"
+      );
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -57,6 +79,7 @@ function LeadNotes({
 
   return (
     <section>
+      {/* HEADER */}
       <div className="mb-4 flex items-center justify-between">
         <h3
           className="
@@ -68,7 +91,7 @@ function LeadNotes({
           Notes
         </h3>
 
-        {!isEditingNotes && (
+        {!isEditingNotes && lead.notes && (
           <button
             onClick={() =>
               setIsEditingNotes(true)
@@ -88,6 +111,7 @@ function LeadNotes({
         )}
       </div>
 
+      {/* CONTENT */}
       <div
         className="
           rounded-2xl
@@ -120,11 +144,25 @@ function LeadNotes({
               "
             />
 
+            {/* CHARACTER COUNT */}
+            <div
+              className="
+                mt-2
+                text-right
+                text-xs
+                text-[var(--color-text-secondary)]
+              "
+            >
+              {notes.length} characters
+            </div>
+
+            {/* ACTIONS */}
             <div className="mt-4 flex gap-2">
               <button
                 onClick={
                   handleSaveNotes
                 }
+                disabled={saving}
                 className="
                   rounded-xl
                   bg-[var(--color-primary)]
@@ -135,15 +173,20 @@ function LeadNotes({
                   text-white
                   transition
                   hover:opacity-90
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
                 "
               >
-                Save Notes
+                {saving
+                  ? "Saving..."
+                  : "Save Notes"}
               </button>
 
               <button
                 onClick={
                   handleCancel
                 }
+                disabled={saving}
                 className="
                   rounded-xl
                   border
@@ -154,6 +197,7 @@ function LeadNotes({
                   font-medium
                   transition
                   hover:bg-slate-50
+                  disabled:opacity-50
                 "
               >
                 Cancel
@@ -172,9 +216,14 @@ function LeadNotes({
             {lead.notes}
           </p>
         ) : (
-          <div className="text-center py-6">
-            <p className="font-medium">
-              No notes yet
+          <div className="py-8 text-center">
+            <p
+              className="
+                font-medium
+                text-[var(--color-text)]
+              "
+            >
+              No notes added yet
             </p>
 
             <p
@@ -184,10 +233,31 @@ function LeadNotes({
                 text-[var(--color-text-secondary)]
               "
             >
-              Add details about the lead,
-              their background, interests,
-              or conversation context.
+              Save conversation details,
+              interests, objections,
+              or anything useful for future
+              follow-ups.
             </p>
+
+            <button
+              onClick={() =>
+                setIsEditingNotes(true)
+              }
+              className="
+                mt-4
+                rounded-lg
+                border
+                border-[var(--color-border)]
+                px-4
+                py-2
+                text-sm
+                font-medium
+                transition
+                hover:bg-slate-50
+              "
+            >
+              Add Notes
+            </button>
           </div>
         )}
       </div>

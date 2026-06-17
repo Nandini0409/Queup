@@ -9,10 +9,11 @@ import ActivityTimeline from "./ActivityTimeline";
 function LeadDrawer({
   lead,
   onClose,
+  onLeadStatusChanged,
 }) {
   const [leadData, setLeadData] =
     useState(lead);
-    console.log(lead)
+  console.log(lead)
 
   const [activities, setActivities] =
     useState([]);
@@ -85,12 +86,9 @@ function LeadDrawer({
           <LeadHeader
             lead={leadData}
             onClose={onClose}
-            onLeadUpdated={
-              setLeadData
-            }
-            onActivitiesUpdated={
-              setActivities
-            }
+            onLeadUpdated={setLeadData}
+            onActivitiesUpdated={setActivities}
+            onLeadStatusChanged={onLeadStatusChanged}
           />
 
           {/* Divider */}

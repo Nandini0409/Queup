@@ -1,4 +1,5 @@
 import { useState } from "react"
+import toast from "react-hot-toast"
 
 import { createLead } from "../services/leads"
 import { createActivity } from "../services/activities"
@@ -30,9 +31,20 @@ export function useAddLead() {
         "lead_added"
       )
 
+      toast.success(
+        `${lead.name} added to queue`
+      )
+
       return lead
     } catch (err) {
-      setError(err.message)
+      const message =
+        err.message ||
+        "Failed to add lead!"
+
+      setError(message)
+
+      toast.error(message)
+
       throw err
     } finally {
       setLoading(false)

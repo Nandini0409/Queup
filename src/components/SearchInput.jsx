@@ -36,9 +36,10 @@ function SearchInput({
           text-sm
           outline-none
           ring-1
+          hover:ring-2
           ring-[var(--color-border)]
           transition
-          focus:ring-2
+          focus:ring-1
           focus:ring-[var(--color-accent)]
         "
       />

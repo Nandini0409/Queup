@@ -1,68 +1,89 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import { useCurrentUser } from "../../hooks/useCurrentUser";
+
+import SearchInput from "../SearchInput";
+import LeadDrawer from "../drawer/LeadDrawer";
+import LeadRow from "../LeadRow";
+import TemplatePanel from "../TemplatePanel";
 
 import {
   searchLeadForAcceptance,
   markInitialMessageSent,
 } from "../../services/leads";
 
-import {
-  createActivity,
-} from "../../services/activities";
+import { createActivity } from "../../services/activities";
 
 import {
   getTemplate,
   saveTemplate,
 } from "../../services/templates";
 
+
+
+
+function LeadRowSkeleton() {
+  return (
+    <div
+      className="
+        flex items-center justify-between
+        px-4 py-4
+        border-b border-[var(--color-border)]
+      "
+    >
+      <div>
+        <div className="h-4 w-32 rounded bg-slate-200 animate-pulse" />
+        <div className="mt-2 h-3 w-40 rounded bg-slate-100 animate-pulse" />
+      </div>
+
+      <div className="flex gap-2">
+        <div className="h-8 w-16 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="h-8 w-16 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="h-8 w-28 rounded-lg bg-slate-200 animate-pulse" />
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
 function AcceptedConnectionsTab() {
   const user = useCurrentUser();
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
+  const [leads, setLeads] = useState([]);
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [markingId, setMarkingId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [template, setTemplate] = useState("");
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [showTemplate, setShowTemplate] = useState(false);
 
-  const [leads, setLeads] =
-    useState([]);
-
-  const [template, setTemplate] =
-    useState("");
-
-  const [
-    savingTemplate,
-    setSavingTemplate,
-  ] = useState(false);
-
+  // LOAD TEMPLATE
   useEffect(() => {
     if (!user) return;
 
     async function loadTemplate() {
       try {
-        const data =
-          await getTemplate(
-            user.id,
-            "initial_message"
-          );
-
-        if (data) {
-          setTemplate(
-            data.content
-          );
-        } else {
-          setTemplate(
-            `Hi {{firstName}},
-
-Just following up on my previous message.`
-          );
-        }
+        const data = await getTemplate(user.id, "initial_message");
+        setTemplate(
+          data?.content ||
+          `Hi {{firstName}},\n\nJust following up on my previous message.`
+        );
       } catch (error) {
         console.error(error);
+        toast.error("Failed to load template");
       }
     }
 
     loadTemplate();
   }, [user]);
 
+  // SEARCH
   useEffect(() => {
     if (!user) return;
 
@@ -73,215 +94,245 @@ Just following up on my previous message.`
           return;
         }
 
-        const data =
-          await searchLeadForAcceptance(
-            user.id,
-            search
-          );
+        setLoading(true);
+
+        const data = await searchLeadForAcceptance(
+          user.id,
+          search
+        );
 
         setLeads(data);
       } catch (error) {
         console.error(error);
+        toast.error("Failed to search leads");
+      }
+      finally {
+        setLoading(false);
       }
     }
 
     searchLeads();
   }, [search, user]);
 
-  const handleSaveTemplate =
-    async () => {
-      try {
-        setSavingTemplate(true);
+  // SAVE TEMPLATE
+  const handleSaveTemplate = async () => {
+    try {
+      setSavingTemplate(true);
 
-        await saveTemplate(
-          user.id,
-          "initial_message",
-          template
-        );
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setSavingTemplate(false);
+      if (!template.includes("{{firstName}}")) {
+        toast("Missing {{firstName}} personalization", { icon: "⚠️" });
       }
-    };
 
-  const handleCopyMessage =
-    async (lead) => {
-      try {
-        const firstName =
-          lead.name.split(" ")[0];
+      await saveTemplate(user.id, "initial_message", template);
+      toast.success("Template saved");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save template");
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
 
-        const message =
-          template.replace(
-            "{{firstName}}",
-            firstName
-          );
+  // COPY MESSAGE
+  const handleCopyMessage = async (lead) => {
+    try {
+      const firstName = lead.name.split(" ")[0];
+      const message = template.replace("{{firstName}}", firstName);
+      await navigator.clipboard.writeText(message);
+      toast.success("Copied");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to copy message");
+    }
+  };
 
-        await navigator.clipboard.writeText(
-          message
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  // MARK SENT
+  const handleInitialMessageSent = async (lead) => {
+    try {
+      setMarkingId(lead.id);
 
-  const handleInitialMessageSent =
-    async (lead) => {
-      try {
-        const updatedLead =
-          await markInitialMessageSent(
-            lead.id
-          );
+      const updatedLead = await markInitialMessageSent(lead.id);
 
-        await createActivity(
-          updatedLead.user_id,
-          updatedLead.id,
-          "initial_message_sent"
-        );
+      await createActivity(
+        updatedLead.user_id,
+        updatedLead.id,
+        "initial_message_sent"
+      );
 
-        setLeads((prev) =>
-          prev.map((item) =>
-            item.id === lead.id
-              ? updatedLead
-              : item
-          )
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      setLeads((prev) => prev.filter((item) => item.id !== lead.id));
+      toast.success("Marked sent");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update lead");
+    } finally {
+      setMarkingId(null);
+    }
+  };
+
+
+  function handleLeadStatusChanged(
+  updatedLead
+) {
+  setLeads((prev) =>
+    prev.filter(
+      (lead) =>
+        lead.id !== updatedLead.id
+    )
+  );
+}
 
   return (
-    <div>
-      <h2>
-        Accepted Connections
-      </h2>
+    <div className="space-y-6">
 
-      <p>
-        Did any connection
-        requests get accepted?
-      </p>
+      {selectedLead && (
+        <LeadDrawer
+  lead={selectedLead}
+  onClose={() =>
+    setSelectedLead(null)
+  }
+  onLeadStatusChanged={
+    handleLeadStatusChanged
+  }
+/>
+      )}
 
-      <h3>
-        General Template
-      </h3>
-
-      <textarea
-        rows={6}
-        value={template}
-        onChange={(e) =>
-          setTemplate(
-            e.target.value
-          )
+      {/* ================= TEMPLATE (SOFT TOOL PANEL) ================= */}
+      <TemplatePanel
+        title="Initial Message Template"
+        description="Customize the first message sent to new connections."
+        template={template}
+        setTemplate={setTemplate}
+        showTemplate={showTemplate}
+        onToggle={() =>
+          setShowTemplate((prev) => !prev)
         }
+        onSave={handleSaveTemplate}
+        saving={savingTemplate}
       />
 
-      <button
-        onClick={
-          handleSaveTemplate
-        }
-      >
-        {savingTemplate
-          ? "Saving..."
-          : "Save Template"}
-      </button>
-
-      <hr />
-
-      <input
-        type="text"
-        placeholder="Search Lead"
+      {/* ================= SEARCH ================= */}
+      <SearchInput
         value={search}
-        onChange={(e) =>
-          setSearch(
-            e.target.value
-          )
-        }
+        onChange={setSearch}
+        placeholder="Search by lead name..."
       />
 
-      <hr />
-
-      {search &&
-        leads.length === 0 && (
-          <p>
-            No matching leads
-            found.
-          </p>
-        )}
-
-      {leads.map((lead) => (
-        <div key={lead.id}>
-          <h3>{lead.name}</h3>
-
-          <p>
-            Status:{" "}
-            {lead.status}
+      {/* INITIAL EMPTY STATE */}
+      {!search.trim() ? (
+        <div
+          className="
+      rounded-xl
+      border border-dashed
+      border-[var(--color-border)]
+      bg-white
+      p-8
+      text-center
+    "
+        >
+          <p className="font-medium text-[var(--color-text)]">
+            Search accepted connections
           </p>
 
-          <p>
-            Notes:{" "}
-            {lead.notes ||
-              "No notes"}
+          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+            Find leads who accepted your request and send the first message.
+          </p>
+        </div>
+      ) : search && !loading && leads.length === 0 ? (
+        <div
+          className="
+      rounded-xl
+      border border-dashed
+      border-[var(--color-border)]
+      bg-white
+      p-8
+      text-center
+    "
+        >
+          <p className="font-medium text-[var(--color-text)]">
+            No matching connections found
           </p>
 
-          {lead.status ===
-          "request_sent" ? (
+          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+            Try a different name or spelling.
+          </p>
+        </div>
+      ) : (
+        <div
+          className="
+      overflow-hidden rounded-xl
+      bg-white
+      border border-[rgba(24,27,58,0.06)]
+      shadow-sm
+    "
+        >
+          {loading ? (
             <>
-              <button
-                onClick={() =>
-                  handleCopyMessage(
-                    lead
-                  )
-                }
-              >
-                Copy Message
-              </button>
-
-              <a
-                href={
-                  lead.profile_url
-                }
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open LinkedIn
-              </a>
-
-              <button
-                onClick={() =>
-                  handleInitialMessageSent(
-                    lead
-                  )
-                }
-              >
-                Initial Message
-                Sent
-              </button>
+              <LeadRowSkeleton />
+              <LeadRowSkeleton />
+              <LeadRowSkeleton />
             </>
           ) : (
-            <>
-              <p>
-                This lead is
-                no longer waiting
-                for an initial
-                message.
-              </p>
-
-              <a
-                href={
-                  lead.profile_url
+            leads.map((lead) => (
+              <LeadRow
+                key={lead.id}
+                lead={lead}
+                subtitle="Ready for your first message?"
+                tertiary={
+                  <button
+                    onClick={() => setSelectedLead(lead)}
+                    className="
+                text-xs px-3 py-1.5 rounded-lg
+                border border-[rgba(24,27,58,0.10)]
+                text-[rgba(5,5,12,0.85)]
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-accent)]
+                hover:bg-[rgba(200,230,107,0.08)]
+                transition
+              "
+                  >
+                    View
+                  </button>
                 }
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open LinkedIn
-              </a>
-            </>
+                secondary={
+                  <button
+                    onClick={() => handleCopyMessage(lead)}
+                    className="
+                text-xs px-3 py-1.5 rounded-lg
+                border border-[rgba(24,27,58,0.10)]
+                text-[rgba(5,5,12,0.85)]
+                hover:text-[var(--color-primary)]
+                hover:border-[var(--color-accent)]
+                hover:bg-[rgba(200,230,107,0.08)]
+                transition
+              "
+                  >
+                    Copy
+                  </button>
+                }
+                primary={
+                  <button
+                    onClick={() => handleInitialMessageSent(lead)}
+                    disabled={markingId === lead.id}
+                    className="
+                rounded-lg bg-[var(--color-accent)]
+                px-4 py-2 text-sm font-semibold
+                text-[var(--color-primary)]
+                transition
+                hover:opacity-90
+                active:scale-[0.98]
+                disabled:opacity-50
+              "
+                  >
+                    {markingId === lead.id
+                      ? "Updating..."
+                      : "Mark Sent"}
+                  </button>
+                }
+              />
+            ))
           )}
-
-          <hr />
         </div>
-      ))}
+      )}
     </div>
   );
 }
