@@ -56,13 +56,20 @@ function StatusBadge({ status }) {
         inline-flex
         items-center
         gap-1.5
+
         rounded-full
         border
-        px-3
+
+        px-2.5
+        sm:px-3
+
         py-1
+
         text-xs
         font-medium
-        whitespace-nowrap
+
+        max-w-full
+
         ${current.className}
       `}
     >
@@ -72,10 +79,13 @@ function StatusBadge({ status }) {
           w-1.5
           rounded-full
           bg-current
+          shrink-0
         "
       />
 
-      {current.label}
+      <span className="truncate">
+        {current.label}
+      </span>
     </span>
   );
 }

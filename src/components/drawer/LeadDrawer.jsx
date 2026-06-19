@@ -11,15 +11,9 @@ function LeadDrawer({
   onClose,
   onLeadStatusChanged,
 }) {
-  const [leadData, setLeadData] =
-    useState(lead);
-  console.log(lead)
-
-  const [activities, setActivities] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
+  const [leadData, setLeadData] = useState(lead);
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLeadData(lead);
@@ -32,11 +26,7 @@ function LeadDrawer({
       try {
         setLoading(true);
 
-        const data =
-          await getLeadActivities(
-            lead.id
-          );
-
+        const data = await getLeadActivities(lead.id);
         setActivities(data);
       } catch (error) {
         console.error(error);
@@ -52,37 +42,64 @@ function LeadDrawer({
 
   return (
     <>
-      {/* Overlay */}
+      {/* OVERLAY */}
       <div
         className="
-          fixed
-          inset-0
-          z-40
-          bg-black/30
-          backdrop-blur-[2px]
+          fixed inset-0 z-40
+          bg-black/40
+          backdrop-blur-sm
         "
         onClick={onClose}
       />
 
-      {/* Drawer */}
+      {/* DRAWER */}
       <div
         className="
-          fixed
-          right-0
-          top-0
-          z-50
-          h-screen
-          w-full
-          max-w-[540px]
+          fixed right-0 top-0 z-50
+          h-full w-full sm:max-w-[540px]
           overflow-y-auto
-          border-l
-          border-[var(--color-border)]
+
           bg-[var(--color-card)]
+          border-l border-[var(--color-border)]
+
           shadow-2xl
         "
       >
-        <div className="p-6">
-          {/* Header */}
+        {/* sticky header area */}
+        <div
+          className="
+            sticky top-0 z-10
+
+            bg-[var(--color-card)]
+            border-b border-[var(--color-border)]
+
+            px-4 sm:px-6 py-4
+            flex items-center justify-between
+          "
+        >
+          <h2 className="text-sm font-semibold text-[var(--color-text)]">
+            Lead Details
+          </h2>
+
+          <button
+            onClick={onClose}
+            className="
+              rounded-lg
+              px-3 py-1.5
+              text-sm
+              text-[var(--color-text-secondary)]
+              hover:bg-slate-100
+              transition
+            "
+          >
+            Close
+          </button>
+        </div>
+
+        {/* CONTENT */}
+        <div className="p-4 sm:p-6 space-y-8">
+
+          {/* HEADER */}
           <LeadHeader
             lead={leadData}
             onClose={onClose}
@@ -91,33 +108,22 @@ function LeadDrawer({
             onLeadStatusChanged={onLeadStatusChanged}
           />
 
-          {/* Divider */}
-          <div className="my-8 border-t border-[var(--color-border)]" />
+          {/* DIVIDER */}
+          <div className="border-t border-[var(--color-border)]" />
 
-          {/* Notes */}
+          {/* NOTES */}
           <LeadNotes
             lead={leadData}
-            onLeadUpdated={
-              setLeadData
-            }
-            onActivitiesUpdated={
-              setActivities
-            }
+            onLeadUpdated={setLeadData}
+            onActivitiesUpdated={setActivities}
           />
 
-          {/* Divider */}
-          <div className="my-8 border-t border-[var(--color-border)]" />
+          {/* DIVIDER */}
+          <div className="border-t border-[var(--color-border)]" />
 
-          {/* Timeline */}
+          {/* TIMELINE */}
           <section>
-            <h3
-              className="
-                mb-5
-                text-lg
-                font-semibold
-                text-[var(--color-text)]
-              "
-            >
+            <h3 className="mb-4 text-base sm:text-lg font-semibold text-[var(--color-text)]">
               Activity Timeline
             </h3>
 
@@ -126,6 +132,7 @@ function LeadDrawer({
               loading={loading}
             />
           </section>
+
         </div>
       </div>
     </>

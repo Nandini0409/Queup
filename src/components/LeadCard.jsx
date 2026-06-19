@@ -30,41 +30,88 @@ function LeadCard({
   const actionInfo =
     getLeadActionInfo(lead);
 
+  const handleKeyDown = (e) => {
+    if (
+      e.key === "Enter" ||
+      e.key === " "
+    ) {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
     <div
       onClick={onClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
       className="
         cursor-pointer
+
         rounded-2xl
         border
         border-[var(--color-border)]
+
         bg-[var(--color-card)]
-        px-6
-        py-5
+
+        px-4 py-3
+        sm:px-5 sm:py-5
+        lg:px-6 lg:py-5
+
         transition-all
         duration-200
-        hover:border-[var(--color-accent)]
-        hover:bg-white
-        hover:shadow-md
+
+        focus:outline-none
+        focus:ring-2
+        focus:ring-[rgba(24,27,58,0.15)]
+
+        md:hover:border-[var(--color-accent)]
+        md:hover:bg-white
+        md:hover:shadow-md
       "
     >
       <div
         className="
-          grid
-          grid-cols-[240px_1fr_auto]
-          items-start
-          gap-8
+          flex
+          flex-col
+          gap-3
+
+          sm:grid
+          sm:grid-cols-[240px_1fr_auto]
+          sm:items-start
+          sm:gap-8
         "
       >
-        {/* NAME */}
-
-        <div className="min-w-0">
+        {/* MOBILE HEADER */}
+        <div className="sm:hidden">
           <h3
             className="
-              truncate
-              text-lg
+              text-base
               font-semibold
               text-[var(--color-text)]
+              break-words
+            "
+          >
+            {lead.name}
+          </h3>
+
+          <div className="mt-2">
+            <StatusBadge
+              status={lead.status}
+            />
+          </div>
+        </div>
+
+        {/* DESKTOP/TABLET NAME */}
+        <div className="hidden sm:block min-w-0">
+          <h3
+            className="
+              text-lg
+              leading-tight
+              font-semibold
+              text-[var(--color-text)]
+              break-words
             "
           >
             {lead.name}
@@ -72,13 +119,13 @@ function LeadCard({
         </div>
 
         {/* NEXT ACTION */}
-
         <div className="min-w-0">
           <div
             className="
               flex
               items-center
               gap-2
+
               text-sm
               font-medium
               text-[var(--color-primary)]
@@ -92,7 +139,7 @@ function LeadCard({
               "
             />
 
-            <span className="truncate">
+            <span className="break-words">
               {actionInfo.title}
             </span>
           </div>
@@ -102,7 +149,7 @@ function LeadCard({
               className={`
                 mt-2
                 flex
-                items-center
+                items-start
                 gap-2
                 text-xs
                 ${subtitleColors[actionInfo.type]}
@@ -110,21 +157,20 @@ function LeadCard({
             >
               <Clock3
                 size={12}
-                className="shrink-0"
+                className="mt-[1px] shrink-0"
               />
 
-              <span className="truncate">
+              <span className="break-words">
                 {actionInfo.subtitle}
               </span>
             </div>
           )}
         </div>
 
-        {/* STATUS */}
-
+        {/* DESKTOP/TABLET STATUS */}
         <div
           className="
-            flex
+            hidden sm:flex
             items-start
             justify-end
           "

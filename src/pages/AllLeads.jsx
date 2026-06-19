@@ -143,7 +143,7 @@ function AllLeads() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-      <div className="mx-auto max-w-5xl px-6">
+      <div className="mx-auto max-w-5xl px-3 sm:px-6">
 
         {selectedLead && (
           <LeadDrawer
@@ -169,38 +169,57 @@ function AllLeads() {
         )}
 
         {/* PAGE HEADER */}
-        <div className="mt-5 mb-5">
-          <h1 className="text-3xl font-bold text-[var(--color-text)]">
-            Lead Queue
-          </h1>
-          <p className="mt-1 text-[var(--color-text-secondary)]">
-            {filteredLeads.length} lead{filteredLeads.length !== 1 ? "s" : ""} in your outreach queue.
-          </p>
-        </div>
+<div className="mt-4 mb-4 sm:mt-5 sm:mb-5">
+  <h1 className="text-2xl sm:text-3xl sm:text-left text-center font-bold text-[var(--color-text)]">
+    Lead Queue
+  </h1>
 
-        {/* SEARCH + FILTERS */}
-        <div className="mt-6 mb-6 rounded-2xl bg-[#f5f5f5] p-3 shadow-sm">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder='Profile name, eg: "John Smith"'
-          />
+  <p className="mt-1 text-sm sm:text-base sm:text-left text-center text-[var(--color-text-secondary)]">
+    {filteredLeads.length} lead
+    {filteredLeads.length !== 1 ? "s" : ""} in your outreach queue.
+  </p>
+</div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {filters.map((item) => (
-              <button
-                key={item.value}
-                onClick={() => setFilter(item.value)}
-                className={`rounded-xl px-4 py-2 text-sm font-medium transition ${filter === item.value
-                  ? "bg-[var(--color-primary)] text-white"
-                  : "bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:bg-slate-200"
-                  }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
+{/* SEARCH + FILTERS */}
+<div className="mt-4 mb-5 sm:mt-6 sm:mb-6 space-y-3">
+
+  {/* SEARCH */}
+  <SearchInput
+    value={search}
+    onChange={setSearch}
+    placeholder='Profile name, eg: "John Smith"'
+  />
+
+  {/* FILTERS (MOBILE FRIENDLY SCROLL + DESKTOP CLEAN) */}
+  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+
+    {filters.map((item) => (
+      <button
+        key={item.value}
+        onClick={() => setFilter(item.value)}
+        className={`
+          whitespace-nowrap
+
+          rounded-full
+          px-4 py-2
+
+          text-sm font-medium
+
+          transition
+
+          ${
+            filter === item.value
+              ? "bg-[var(--color-primary)] text-white"
+              : "bg-white border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-slate-50"
+          }
+        `}
+      >
+        {item.label}
+      </button>
+    ))}
+
+  </div>
+</div>
 
         {/* Divider */}
         <div className="mb-6 h-px bg-[var(--color-border)]" />

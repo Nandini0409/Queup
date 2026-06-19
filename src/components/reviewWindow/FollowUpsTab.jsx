@@ -34,8 +34,7 @@ function FollowUpSectionSkeleton() {
         overflow-hidden
       "
     >
-      {/* header */}
-      <div className="px-5 py-4">
+      <div className="px-4 sm:px-5 py-4">
         <div className="h-5 w-40 rounded bg-slate-200 animate-pulse" />
       </div>
 
@@ -45,8 +44,10 @@ function FollowUpSectionSkeleton() {
         <div
           key={item}
           className="
-            flex items-center justify-between
-            px-5 py-4
+            flex flex-col gap-4
+            sm:flex-row sm:items-center sm:justify-between
+
+            px-4 sm:px-5 py-4
             border-b border-[var(--color-border)]
           "
         >
@@ -55,7 +56,7 @@ function FollowUpSectionSkeleton() {
             <div className="mt-2 h-3 w-40 rounded bg-slate-100 animate-pulse" />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <div className="h-8 w-16 rounded-lg bg-slate-200 animate-pulse" />
             <div className="h-8 w-16 rounded-lg bg-slate-200 animate-pulse" />
             <div className="h-8 w-24 rounded-lg bg-slate-200 animate-pulse" />
@@ -273,12 +274,26 @@ function FollowUpsTab() {
     finalLeads.length > 0;
 
   if (loading) {
-    return <p>Loading...</p>;
-  }
+  return (
+    <div className="space-y-5">
+      <FollowUpSectionSkeleton />
+      <FollowUpSectionSkeleton />
+      <FollowUpSectionSkeleton />
+    </div>
+  );
+}
 
   if (!hasAnyFollowups) {
     return (
-      <div className="rounded-xl border border-[var(--color-border)] bg-white p-8 text-center">
+      <div
+  className="
+    rounded-xl
+    border border-[var(--color-border)]
+    bg-white
+    p-5 sm:p-8
+    text-center
+  "
+>
         <h3 className="mt-3 font-semibold text-[var(--color-text)]">You're all caught up</h3>
         <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
           No follow ups need attention today.
@@ -288,7 +303,7 @@ function FollowUpsTab() {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 sm:space-y-10">
       {followupSections.map((section) =>
         section.leads.length > 0 ? (
           <FollowUpSection

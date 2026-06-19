@@ -59,12 +59,9 @@ const ACTIVITY_CONFIG = {
 
 function TimelineSkeleton() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {[...Array(3)].map((_, index) => (
-        <div
-          key={index}
-          className="flex gap-4 animate-pulse"
-        >
+        <div key={index} className="flex gap-3 sm:gap-4 animate-pulse">
           <div className="h-8 w-8 rounded-full bg-slate-200" />
 
           <div className="flex-1">
@@ -77,26 +74,12 @@ function TimelineSkeleton() {
   );
 }
 
-function ActivityTimeline({
-  activities,
-  loading,
-}) {
-  if (loading) {
-    return <TimelineSkeleton />;
-  }
+function ActivityTimeline({ activities, loading }) {
+  if (loading) return <TimelineSkeleton />;
 
-  if (activities.length === 0) {
+  if (!activities || activities.length === 0) {
     return (
-      <div
-        className="
-          rounded-2xl
-          border
-          border-dashed
-          border-[var(--color-border)]
-          p-8
-          text-center
-        "
-      >
+      <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-6 sm:p-8 text-center">
         <p className="font-medium text-[var(--color-text)]">
           No activity yet
         </p>
@@ -109,80 +92,75 @@ function ActivityTimeline({
   }
 
   return (
-    <div className="space-y-5">
-      {activities.map(
-        (activity, index) => {
-          const config =
-            ACTIVITY_CONFIG[
-              activity.activity_type
-            ] || {
-              label: activity.activity_type,
-              icon: Clock3,
-              bg: "bg-slate-100",
-              text: "text-slate-700",
-            };
+    <div className="space-y-4 sm:space-y-5">
+      {activities.map((activity, index) => {
+        const config = ACTIVITY_CONFIG[activity.activity_type] || {
+          label: activity.activity_type,
+          icon: Clock3,
+          bg: "bg-slate-100",
+          text: "text-slate-700",
+        };
 
-          const Icon = config.icon;
+        const Icon = config.icon;
 
-          const formattedDate =
-            new Date(
-              activity.created_at
-            ).toLocaleString(
-              "en-GB",
-              {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              }
-            );
+        const formattedDate = new Date(activity.created_at).toLocaleString(
+          "en-GB",
+          {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          }
+        );
 
-          return (
-            <div
-              key={activity.id}
-              className="relative flex gap-4"
-            >
-              {index !==
-                activities.length - 1 && (
-                <div
-                  className="
-                    absolute
-                    left-4
-                    top-9
-                    h-full
-                    w-px
-                    bg-[var(--color-border)]
-                  "
-                />
-              )}
-
+        return (
+          <div
+            key={activity.id}
+            className="relative flex gap-3 sm:gap-4"
+          >
+            {/* timeline line */}
+            {index !== activities.length - 1 && (
               <div
-                className={`
-                  relative z-10
-                  flex h-8 w-8
-                  items-center justify-center
-                  rounded-full
-                  ${config.bg}
-                  ${config.text}
-                `}
-              >
-                <Icon size={14} />
-              </div>
+                className="
+                  absolute
+                  left-4
+                  top-9
+                  h-full
+                  w-px
+                  bg-[var(--color-border)]
+                "
+              />
+            )}
 
-              <div className="flex-1">
-                <p className="font-medium text-[var(--color-text)]">
-                  {config.label}
-                </p>
-
-                <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-                  {formattedDate}
-                </p>
-              </div>
+            {/* icon */}
+            <div
+              className={`
+                relative z-10
+                flex h-8 w-8
+                items-center justify-center
+                rounded-full
+                shrink-0
+                ${config.bg}
+                ${config.text}
+              `}
+            >
+              <Icon size={14} />
             </div>
-          );
-        }
-      )}
+
+            {/* content */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm sm:text-[15px] font-medium text-[var(--color-text)] break-words">
+                {config.label}
+              </p>
+
+              <p className="mt-1 text-[11px] sm:text-xs text-[var(--color-text-secondary)]">
+                {formattedDate}
+              </p>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

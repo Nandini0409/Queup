@@ -18,11 +18,21 @@ function FollowUpSection({
   const [showTemplate, setShowTemplate] = useState(false);
 
   return (
-    <div className="
-      rounded-2xl bg-white shadow-sm overflow-hidden
-      border border-[rgba(24,27,58,0.08)]
-      transition hover:shadow-md hover:-translate-y-[1px]
-    ">
+    <div
+  className="
+    w-full
+    rounded-2xl
+    bg-white
+    shadow-sm
+    overflow-hidden
+
+    border border-[rgba(24,27,58,0.08)]
+
+    transition
+    hover:shadow-md
+    hover:-translate-y-[1px]
+  "
+>
 
       <TemplatePanel
         title={`${title} Template`}
@@ -49,7 +59,8 @@ function FollowUpSection({
               <button
                 onClick={() => onView(lead)}
                 className="
-    text-xs px-3 py-1.5 rounded-lg
+    w-full sm:w-auto
+text-xs px-3 py-2 rounded-lg
     border border-[rgba(24,27,58,0.10)]
     text-[rgba(5,5,12,0.85)]
     hover:text-[var(--color-primary)]
@@ -66,7 +77,8 @@ function FollowUpSection({
               <button
                 onClick={() => onCopy(lead)}
                 className="
-    text-xs px-3 py-1.5 rounded-lg
+    w-full sm:w-auto
+text-xs px-3 py-2 rounded-lg
     border border-[rgba(24,27,58,0.10)]
     text-[rgba(5,5,12,0.85)]
     hover:text-[var(--color-primary)]
@@ -84,8 +96,9 @@ function FollowUpSection({
                 onClick={() => onDone(lead)}
                 disabled={loadingLeadId === lead.id}
                 className="
-          rounded-lg bg-[var(--color-accent)]
-          px-4 py-2 text-sm font-semibold
+          w-full sm:w-auto
+rounded-lg bg-[var(--color-accent)]
+px-4 py-2 text-sm font-semibold
           text-[var(--color-primary)]
           transition
           hover:opacity-90

@@ -2,9 +2,21 @@ export function LeadRowShell({ children }) {
   return (
     <div
       className="
-        flex items-center justify-between
-        px-4 py-4
-        border-b border-[rgba(24,27,58,0.06)]
+        flex
+        flex-col
+        gap-4
+
+        sm:flex-row
+        sm:items-center
+        sm:justify-between
+        text-center
+
+        px-4
+        py-4
+
+        border-b
+        border-[rgba(24,27,58,0.06)]
+
         transition
         hover:bg-[rgba(24,27,58,0.03)]
       "
@@ -14,16 +26,35 @@ export function LeadRowShell({ children }) {
   );
 }
 
-
 export function LeadLeft({ title, subtitle }) {
   return (
-    <div>
-      <h4 className="font-medium text-[var(--color-text)]">
+    <div
+      className="
+        min-w-0
+        flex-1
+      "
+    >
+      <h4
+        className="
+          font-medium
+          sm:text-left
+          text-[var(--color-text)]
+          break-words
+        "
+      >
         {title}
       </h4>
 
       {subtitle && (
-        <p className="mt-1 text-xs text-[rgba(24,27,58,0.55)]">
+        <p
+          className="
+            mt-1
+            text-xs
+            sm:text-left
+            text-[rgba(24,27,58,0.55)]
+            break-words
+          "
+        >
           {subtitle}
         </p>
       )}
@@ -31,17 +62,32 @@ export function LeadLeft({ title, subtitle }) {
   );
 }
 
-
-export function LeadActions({ primary, secondary, tertiary }) {
+export function LeadActions({
+  primary,
+  secondary,
+  tertiary,
+}) {
   return (
-    <div className="flex items-center gap-3">
+    <div
+      className="
+        flex
+        flex-wrap
+        items-center
+        gap-2
+
+        sm:flex-nowrap
+        sm:gap-3
+
+        w-full
+        sm:w-auto
+      "
+    >
       {tertiary}
       {secondary}
       {primary}
     </div>
   );
 }
-
 
 function LeadRow({
   lead,
@@ -54,7 +100,6 @@ function LeadRow({
 }) {
   return (
     <LeadRowShell>
-
       {/* LEFT */}
       <LeadLeft
         title={lead?.name}
@@ -67,7 +112,6 @@ function LeadRow({
         secondary={secondary}
         primary={primary}
       />
-
     </LeadRowShell>
   );
 }

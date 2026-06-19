@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 
 import SearchInput from "../SearchInput";
@@ -15,19 +14,16 @@ import {
 
 import { createActivity } from "../../services/activities";
 
-
-
-
 function LeadRowSkeleton() {
   return (
     <div
       className="
-        flex items-center justify-between
-        px-4 py-4
+        flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between
+        px-3 sm:px-4 py-4
         border-b border-[var(--color-border)]
       "
     >
-      <div>
+      <div className="min-w-0">
         <div className="h-4 w-32 rounded bg-slate-200 animate-pulse" />
         <div className="mt-2 h-3 w-40 rounded bg-slate-100 animate-pulse" />
       </div>
@@ -40,14 +36,9 @@ function LeadRowSkeleton() {
   );
 }
 
-
-
-
-
-
-
 function RepliedLeadsTab() {
   const user = useCurrentUser();
+
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [leads, setLeads] = useState([]);
@@ -86,7 +77,9 @@ function RepliedLeadsTab() {
     try {
       setLoadingLeadId(lead.id);
 
-      const updatedLead = await markLeadInterested(lead.id);
+      const updatedLead = await markLeadInterested(
+        lead.id
+      );
 
       await createActivity(
         updatedLead.user_id,
@@ -98,7 +91,9 @@ function RepliedLeadsTab() {
         prev.filter((item) => item.id !== lead.id)
       );
 
-      toast.success(`${lead.name} marked as interested`);
+      toast.success(
+        `${lead.name} marked as interested`
+      );
     } catch (error) {
       console.error(error);
       toast.error("Failed to update lead");
@@ -107,38 +102,32 @@ function RepliedLeadsTab() {
     }
   };
 
-
-  function handleLeadStatusChanged(
-  updatedLead
-) {
-  setLeads((prev) =>
-    prev.filter(
-      (lead) =>
-        lead.id !== updatedLead.id
-    )
-  );
-}
+  function handleLeadStatusChanged(updatedLead) {
+    setLeads((prev) =>
+      prev.filter(
+        (lead) => lead.id !== updatedLead.id
+      )
+    );
+  }
 
   return (
-    <div className="space-y-5">
-
+    <div className="space-y-4 sm:space-y-5">
       <SearchInput
         value={search}
         onChange={setSearch}
         placeholder='Search lead (e.g. "John Smith")'
       />
 
-      {/* LIST AREA */}
       {!search.trim() ? (
         <div
           className="
-      rounded-xl
-      border border-dashed
-      border-[var(--color-border)]
-      bg-white
-      p-8
-      text-center
-    "
+            rounded-xl
+            border border-dashed
+            border-[var(--color-border)]
+            bg-white
+            p-6 sm:p-8
+            text-center
+          "
         >
           <p className="font-medium text-[var(--color-text)]">
             Search for a replied lead
@@ -151,13 +140,13 @@ function RepliedLeadsTab() {
       ) : search && !loading && leads.length === 0 ? (
         <div
           className="
-      rounded-xl
-      border border-dashed
-      border-[var(--color-border)]
-      bg-white
-      p-8
-      text-center
-    "
+            rounded-xl
+            border border-dashed
+            border-[var(--color-border)]
+            bg-white
+            p-6 sm:p-8
+            text-center
+          "
         >
           <p className="font-medium text-[var(--color-text)]">
             No matching leads found
@@ -170,10 +159,12 @@ function RepliedLeadsTab() {
       ) : (
         <div
           className="
-      overflow-hidden rounded-xl
-      border border-[var(--color-border)]
-      bg-white shadow-sm
-    "
+            overflow-hidden
+            rounded-xl
+            border border-[var(--color-border)]
+            bg-white
+            shadow-sm
+          "
         >
           {loading ? (
             <>
@@ -189,33 +180,45 @@ function RepliedLeadsTab() {
                 subtitle="Did they show interest?"
                 tertiary={
                   <button
-                    onClick={() => setSelectedLead(lead)}
+                    onClick={() =>
+                      setSelectedLead(lead)
+                    }
                     className="
-                text-xs px-3 py-1.5 rounded-lg
-                border border-[rgba(24,27,58,0.10)]
-                text-[rgba(5,5,12,0.85)]
-                hover:text-[var(--color-primary)]
-                hover:border-[var(--color-accent)]
-                hover:bg-[rgba(200,230,107,0.08)]
-                transition
-              "
+                      w-full sm:w-auto
+                      text-xs
+                      px-3 py-2
+                      rounded-lg
+                      border border-[rgba(24,27,58,0.10)]
+                      text-[rgba(5,5,12,0.85)]
+                      hover:text-[var(--color-primary)]
+                      hover:border-[var(--color-accent)]
+                      hover:bg-[rgba(200,230,107,0.08)]
+                      transition
+                    "
                   >
                     View
                   </button>
                 }
                 primary={
                   <button
-                    onClick={() => handleMarkInterested(lead)}
-                    disabled={loadingLeadId === lead.id}
+                    onClick={() =>
+                      handleMarkInterested(lead)
+                    }
+                    disabled={
+                      loadingLeadId === lead.id
+                    }
                     className="
-                rounded-lg bg-[var(--color-accent)]
-                px-4 py-2 text-sm font-semibold
-                text-[var(--color-primary)]
-                transition
-                hover:opacity-90
-                active:scale-[0.98]
-                disabled:opacity-50
-              "
+                      w-full sm:w-auto
+                      rounded-lg
+                      bg-[var(--color-accent)]
+                      px-4 py-2
+                      text-sm font-semibold
+                      text-[var(--color-primary)]
+                      transition
+                      hover:opacity-90
+                      active:scale-[0.98]
+                      disabled:opacity-50
+                    "
                   >
                     {loadingLeadId === lead.id
                       ? "Updating..."
@@ -230,14 +233,14 @@ function RepliedLeadsTab() {
 
       {selectedLead && (
         <LeadDrawer
-  lead={selectedLead}
-  onClose={() =>
-    setSelectedLead(null)
-  }
-  onLeadStatusChanged={
-    handleLeadStatusChanged
-  }
-/>
+          lead={selectedLead}
+          onClose={() =>
+            setSelectedLead(null)
+          }
+          onLeadStatusChanged={
+            handleLeadStatusChanged
+          }
+        />
       )}
     </div>
   );

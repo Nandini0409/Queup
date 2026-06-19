@@ -56,21 +56,40 @@ function DailyProspectingCard({ refreshKey }) {
   const isComplete = count >= GOAL;
 
   return (
-    <div className="space-y-4">
-
+    <div className="w-full space-y-4">
       <div>
-        <div className="text-2xl font-bold text-[var(--color-primary)]">
+        <div
+          className="
+            text-2xl sm:text-3xl
+            font-bold
+            text-[var(--color-primary)]
+            break-words
+          "
+        >
           {loading
             ? "..."
             : `${count} of ${GOAL}`}
         </div>
 
-        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+        <p
+          className="
+            mt-1
+            text-sm
+            text-[var(--color-text-secondary)]
+          "
+        >
           prospects added today
         </p>
       </div>
 
-      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+      <div
+        className="
+          h-2.5
+          overflow-hidden
+          rounded-full
+          bg-slate-100
+        "
+      >
         <div
           className="
             h-full
@@ -85,7 +104,13 @@ function DailyProspectingCard({ refreshKey }) {
       </div>
 
       {!loading && !isComplete && (
-        <p className="text-sm text-[var(--color-text-secondary)]">
+        <p
+          className="
+            text-sm
+            break-words
+            text-[var(--color-text-secondary)]
+          "
+        >
           {remaining} more to reach today's goal.
         </p>
       )}
@@ -95,16 +120,19 @@ function DailyProspectingCard({ refreshKey }) {
           className="
             rounded-xl
             bg-[rgba(200,230,107,0.18)]
+
             px-4 py-3
+
             text-sm
             font-medium
+            leading-relaxed
+
             text-[var(--color-primary)]
           "
         >
           You've reached today's prospecting goal.
         </div>
       )}
-
     </div>
   );
 }

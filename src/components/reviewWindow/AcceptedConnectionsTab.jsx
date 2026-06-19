@@ -27,8 +27,9 @@ function LeadRowSkeleton() {
   return (
     <div
       className="
-        flex items-center justify-between
-        px-4 py-4
+        flex flex-col gap-4
+        sm:flex-row sm:items-center sm:justify-between
+        px-3 sm:px-4 py-4
         border-b border-[var(--color-border)]
       "
     >
@@ -37,7 +38,7 @@ function LeadRowSkeleton() {
         <div className="mt-2 h-3 w-40 rounded bg-slate-100 animate-pulse" />
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <div className="h-8 w-16 rounded-lg bg-slate-200 animate-pulse" />
         <div className="h-8 w-16 rounded-lg bg-slate-200 animate-pulse" />
         <div className="h-8 w-28 rounded-lg bg-slate-200 animate-pulse" />
@@ -171,29 +172,29 @@ function AcceptedConnectionsTab() {
 
 
   function handleLeadStatusChanged(
-  updatedLead
-) {
-  setLeads((prev) =>
-    prev.filter(
-      (lead) =>
-        lead.id !== updatedLead.id
-    )
-  );
-}
+    updatedLead
+  ) {
+    setLeads((prev) =>
+      prev.filter(
+        (lead) =>
+          lead.id !== updatedLead.id
+      )
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
 
       {selectedLead && (
         <LeadDrawer
-  lead={selectedLead}
-  onClose={() =>
-    setSelectedLead(null)
-  }
-  onLeadStatusChanged={
-    handleLeadStatusChanged
-  }
-/>
+          lead={selectedLead}
+          onClose={() =>
+            setSelectedLead(null)
+          }
+          onLeadStatusChanged={
+            handleLeadStatusChanged
+          }
+        />
       )}
 
       {/* ================= TEMPLATE (SOFT TOOL PANEL) ================= */}
@@ -225,7 +226,7 @@ function AcceptedConnectionsTab() {
       border border-dashed
       border-[var(--color-border)]
       bg-white
-      p-8
+      p-5 sm:p-8
       text-center
     "
         >
@@ -244,7 +245,7 @@ function AcceptedConnectionsTab() {
       border border-dashed
       border-[var(--color-border)]
       bg-white
-      p-8
+      p-5 sm:p-8
       text-center
     "
         >
@@ -281,7 +282,8 @@ function AcceptedConnectionsTab() {
                   <button
                     onClick={() => setSelectedLead(lead)}
                     className="
-                text-xs px-3 py-1.5 rounded-lg
+  w-full sm:w-auto
+  text-xs px-3 py-2 rounded-lg
                 border border-[rgba(24,27,58,0.10)]
                 text-[rgba(5,5,12,0.85)]
                 hover:text-[var(--color-primary)]
@@ -297,7 +299,8 @@ function AcceptedConnectionsTab() {
                   <button
                     onClick={() => handleCopyMessage(lead)}
                     className="
-                text-xs px-3 py-1.5 rounded-lg
+                w-full sm:w-auto
+  text-xs px-3 py-2 rounded-lg
                 border border-[rgba(24,27,58,0.10)]
                 text-[rgba(5,5,12,0.85)]
                 hover:text-[var(--color-primary)]
@@ -314,8 +317,9 @@ function AcceptedConnectionsTab() {
                     onClick={() => handleInitialMessageSent(lead)}
                     disabled={markingId === lead.id}
                     className="
-                rounded-lg bg-[var(--color-accent)]
-                px-4 py-2 text-sm font-semibold
+                w-full sm:w-auto
+  rounded-lg bg-[var(--color-accent)]
+  px-4 py-2 text-sm font-semibold
                 text-[var(--color-primary)]
                 transition
                 hover:opacity-90
