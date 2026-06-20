@@ -7,7 +7,7 @@ import {
 
 import StatusBadge from "../StatusBadge";
 import toast from "react-hot-toast";
-
+import { LEAD_STATUS } from "../../constants/leadStatus";
 import { getLeadActionInfo } from "../../utils/getLeadActionInfo";
 import { markLeadInterested } from "../../services/leads";
 import {
@@ -31,6 +31,16 @@ function LeadHeader({
   onLeadStatusChanged,
 }) {
   const [updating, setUpdating] = useState(false);
+  
+  const canMarkInterested = [
+  LEAD_STATUS.INITIAL_MESSAGE_SENT,
+  LEAD_STATUS.FOLLOW_UP_1_SENT,
+  LEAD_STATUS.FOLLOW_UP_2_SENT,
+  LEAD_STATUS.FINAL_FOLLOW_UP_SENT,
+].includes(lead.status);
+
+const shouldShowOutreachWarning =
+  lead.status === LEAD_STATUS.REQUEST_SENT;
 
   async function handleMarkInterested() {
     try {
@@ -128,6 +138,23 @@ function LeadHeader({
         )}
       </div>
 
+      {shouldShowOutreachWarning && (
+        <div
+          className="
+      rounded-xl
+      border
+      border-[var(--color-border)]
+      bg-slate-50
+      p-4
+      text-sm
+      text-[var(--color-text-secondary)]
+    "
+        >
+          This lead hasn't received an outreach message yet.
+          Send an initial message before marking them as interested.
+        </div>
+      )}
+
       {/* ACTIONS */}
       <div className="flex flex-col sm:flex-row gap-3">
 
@@ -155,7 +182,7 @@ function LeadHeader({
           View Profile
         </a>
 
-        {lead.status !== "interested" && (
+        {canMarkInterested && (
           <button
             onClick={handleMarkInterested}
             disabled={updating}

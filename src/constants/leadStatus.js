@@ -17,14 +17,3 @@ export const LEAD_STATUS = {
 };
 
 
-// CHECK (
-//   activity_type IN (
-//     'lead_added',
-//     'initial_message_sent',
-//     'follow_up_1_sent',
-//     'follow_up_2_sent',
-//     'final_follow_up_sent',
-//     'marked_interested',
-//     'notes_updated'
-//   )
-// );

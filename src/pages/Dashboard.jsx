@@ -1,118 +1,114 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import Header from "../components/Header";
 import ReviewWindow from "../components/reviewWindow/ReviewWindow";
 import AddLeadModal from "../components/AddLeadModal";
+import FirstTimeOnboarding from "../components/FirstTimeOnboarding";
+
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { getLeadCount } from "../services/leads";
 
 function Dashboard() {
   const navigate = useNavigate();
   const user = useCurrentUser();
 
-  const [isAddLeadOpen, setIsAddLeadOpen] =
-    useState(false);
+  const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
+
+  const [totalLeads, setTotalLeads] = useState(null);
+  const [isLoadingLeads, setIsLoadingLeads] = useState(true);
+
+  // Reset state when user changes
+  useEffect(() => {
+    setTotalLeads(null);
+    setIsLoadingLeads(true);
+  }, [user]);
+
+  // Fetch lead count
+  useEffect(() => {
+    async function fetchLeads() {
+      if (!user) return;
+
+      setIsLoadingLeads(true);
+
+      try {
+        const count = await getLeadCount(user.id);
+        setTotalLeads(count);
+      } catch (err) {
+        console.error("Failed to fetch lead count:", err);
+        setTotalLeads(0);
+      } finally {
+        setIsLoadingLeads(false);
+      }
+    }
+
+    fetchLeads();
+  }, [user]);
+
+  const isFirstTimeUser = totalLeads === 0;
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-      <div
-        className="
-          mx-auto
-          max-w-4xl
+      <div className="mx-auto max-w-4xl px-3 sm:px-6">
 
-          px-3
-          sm:px-6
-        "
-      >
         {/* HEADER */}
-        <Header
-          onAddLead={() =>
-            setIsAddLeadOpen(true)
-          }
-        />
+        <Header onAddLead={() => setIsAddLeadOpen(true)} />
 
+        {/* ADD LEAD MODAL */}
         {isAddLeadOpen && user && (
           <AddLeadModal
             userId={user.id}
-            onClose={() =>
-              setIsAddLeadOpen(false)
-            }
+            onClose={() => setIsAddLeadOpen(false)}
             onLeadCreated={() => {
               setIsAddLeadOpen(false);
+              setTotalLeads((prev) =>
+                prev === null ? 1 : prev + 1
+              );
             }}
           />
         )}
 
-        {/* MAIN WORK AREA */}
+        {/* MAIN AREA */}
         <div
           id="inbox"
           className="
-            mt-6
-            sm:mt-8
-
+            mt-6 sm:mt-8
             rounded-2xl
-
-            border
-            border-[var(--color-border)]
-
+            border border-[var(--color-border)]
             bg-[#f7f7f9]
-
-            p-3
-            sm:p-5
-
-            shadow-sm
-            transition
-
+            p-3 sm:p-5
+            shadow-sm transition
             hover:shadow-md
           "
         >
-          <div
-            className="
-              flex
-              flex-col
-              gap-1
-
-              sm:flex-row
-              sm:items-center
-              sm:justify-between
-            "
-          >
-            <div>
-              <h2
-                className="
-                  text-base
-                  sm:text-lg
-                  font-semibold
-                  text-[var(--color-text)]
-                "
-              >
-                Today's Outreach
-              </h2>
-            </div>
+          {/* HEADER ROW */}
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-base sm:text-lg font-semibold text-[var(--color-text)]">
+              Today's Outreach
+            </h2>
 
             <button
-              onClick={() =>
-                navigate("/leads")
-              }
+              onClick={() => navigate("/leads")}
               className="
-                self-start
-
-                sm:text-sm
-                text-xs
-                font-medium
-                text-blue-600
-
-                hover:text-blue-700
-                hover:underline
-
+                self-start sm:text-sm text-xs font-medium
+                text-blue-600 hover:text-blue-700 hover:underline
                 transition
               "
             >
-              Open full inbox →
+              Open Lead Queue →
             </button>
           </div>
 
-          <ReviewWindow />
+          {/* CONTENT STATE */}
+          {isLoadingLeads ? (
+            <div className="py-10 text-center text-gray-500 text-sm">
+              Loading...
+            </div>
+          ) : isFirstTimeUser ? (
+            <FirstTimeOnboarding onAddLead={() => setIsAddLeadOpen(true)} />
+          ) : (
+            <ReviewWindow />
+          )}
         </div>
       </div>
     </div>
@@ -120,3 +116,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+

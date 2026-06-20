@@ -60,6 +60,20 @@ export async function getLeads(userId) {
   return data
 }
 
+export async function getLeadCount(userId) {
+  const { count, error } = await supabase
+    .from("leads")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Error fetching lead count:", error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
 
 export async function getTodaysLeadsCount(userId) {
   const startOfDay = new Date();
@@ -96,6 +110,15 @@ export async function getLeadById(
   return data;
 }
 
+
+export async function deleteLead(leadId) {
+  const { error } = await supabase
+    .from("leads")
+    .delete()
+    .eq("id", leadId);
+
+  if (error) throw error;
+}
 
 
 

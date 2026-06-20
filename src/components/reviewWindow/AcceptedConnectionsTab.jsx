@@ -63,6 +63,7 @@ function AcceptedConnectionsTab() {
   const [template, setTemplate] = useState("");
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [showTemplate, setShowTemplate] = useState(false);
+  
 
   // LOAD TEMPLATE
   useEffect(() => {
@@ -73,7 +74,11 @@ function AcceptedConnectionsTab() {
         const data = await getTemplate(user.id, "initial_message");
         setTemplate(
           data?.content ||
-          `Hi {{firstName}},\n\nJust following up on my previous message.`
+          `Hey {{firstName}}, Thanks for connecting!
+
+[Briefly explain why you're reaching out]
+
+[Ask a simple question or suggest a next step]`
         );
       } catch (error) {
         console.error(error);
@@ -194,6 +199,13 @@ function AcceptedConnectionsTab() {
           onLeadStatusChanged={
             handleLeadStatusChanged
           }
+          onLeadDeleted={(deletedId) =>
+              setLeads((prev) =>
+                prev.filter(
+                  (lead) => lead.id !== deletedId
+                )
+              )
+            }
         />
       )}
 

@@ -240,6 +240,13 @@ function RepliedLeadsTab() {
           onLeadStatusChanged={
             handleLeadStatusChanged
           }
+          onLeadDeleted={(deletedId) =>
+              setLeads((prev) =>
+                prev.filter(
+                  (lead) => lead.id !== deletedId
+                )
+              )
+            }
         />
       )}
     </div>

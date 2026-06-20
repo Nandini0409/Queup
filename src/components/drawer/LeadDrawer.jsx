@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import { getLeadActivities } from "../../services/activities";
+import { deleteLead } from "../../services/leads";
 
 import LeadHeader from "./LeadHeader";
 import LeadNotes from "./LeadNotes";
@@ -10,10 +12,13 @@ function LeadDrawer({
   lead,
   onClose,
   onLeadStatusChanged,
+  onLeadDeleted,
 }) {
   const [leadData, setLeadData] = useState(lead);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] =
+    useState(false);
 
   useEffect(() => {
     setLeadData(lead);
@@ -26,7 +31,10 @@ function LeadDrawer({
       try {
         setLoading(true);
 
-        const data = await getLeadActivities(lead.id);
+        const data = await getLeadActivities(
+          lead.id
+        );
+
         setActivities(data);
       } catch (error) {
         console.error(error);
@@ -37,6 +45,32 @@ function LeadDrawer({
 
     loadActivities();
   }, [lead]);
+
+  async function handleDelete() {
+    const confirmed = window.confirm(
+      `Delete ${leadData.name}?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+
+      await deleteLead(leadData.id);
+
+      toast.success("Lead deleted");
+
+      onLeadDeleted?.(leadData.id);
+
+      onClose();
+    } catch (error) {
+      console.error(error);
+
+      toast.error("Failed to delete lead");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   if (!leadData) return null;
 
@@ -65,7 +99,7 @@ function LeadDrawer({
           shadow-2xl
         "
       >
-        {/* sticky header area */}
+        {/* HEADER */}
         <div
           className="
             sticky top-0 z-10
@@ -77,7 +111,13 @@ function LeadDrawer({
             flex items-center justify-between
           "
         >
-          <h2 className="text-sm font-semibold text-[var(--color-text)]">
+          <h2
+            className="
+              text-sm
+              font-semibold
+              text-[var(--color-text)]
+            "
+          >
             Lead Details
           </h2>
 
@@ -98,14 +138,15 @@ function LeadDrawer({
 
         {/* CONTENT */}
         <div className="p-4 sm:p-6 space-y-8">
-
           {/* HEADER */}
           <LeadHeader
             lead={leadData}
             onClose={onClose}
             onLeadUpdated={setLeadData}
             onActivitiesUpdated={setActivities}
-            onLeadStatusChanged={onLeadStatusChanged}
+            onLeadStatusChanged={
+              onLeadStatusChanged
+            }
           />
 
           {/* DIVIDER */}
@@ -123,7 +164,15 @@ function LeadDrawer({
 
           {/* TIMELINE */}
           <section>
-            <h3 className="mb-4 text-base sm:text-lg font-semibold text-[var(--color-text)]">
+            <h3
+              className="
+                mb-4
+                text-base
+                sm:text-lg
+                font-semibold
+                text-[var(--color-text)]
+              "
+            >
               Activity Timeline
             </h3>
 
@@ -133,6 +182,54 @@ function LeadDrawer({
             />
           </section>
 
+          {/* DIVIDER */}
+          <div className="border-t border-[var(--color-border)]" />
+
+          {/* DANGER ZONE */}
+          <section>
+            <h3
+              className="
+                mb-3
+                text-base
+                font-semibold
+                text-[var(--color-text)]
+              "
+            >
+              Danger Zone
+            </h3>
+
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="
+                w-full
+
+                rounded-xl
+
+                border
+                border-red-200
+
+                px-4
+                py-3
+
+                text-sm
+                font-medium
+
+                text-red-600
+
+                transition
+
+                hover:bg-red-50
+
+                disabled:opacity-50
+                disabled:cursor-not-allowed
+              "
+            >
+              {isDeleting
+                ? "Deleting..."
+                : "Delete Lead"}
+            </button>
+          </section>
         </div>
       </div>
     </>

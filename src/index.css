@@ -39,3 +39,10 @@
 
     text-center;
 }
+
+
+*{
+  button{
+    cursor:pointer
+  }
+}

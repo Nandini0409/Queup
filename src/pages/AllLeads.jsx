@@ -4,6 +4,7 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 
 import { getLeads } from "../services/leads";
 import { LEAD_STATUS } from "../constants/leadStatus";
+import { useNavigate } from "react-router-dom";
 
 import LeadDrawer from "../components/drawer/LeadDrawer";
 import AddLeadModal from "../components/AddLeadModal";
@@ -16,6 +17,7 @@ const LEADS_PER_PAGE = 10;
 
 function AllLeads() {
   const user = useCurrentUser();
+  const navigate = useNavigate();
 
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -151,6 +153,13 @@ function AllLeads() {
             onClose={() =>
               setSelectedLead(null)
             }
+            onLeadDeleted={(deletedId) =>
+              setLeads((prev) =>
+                prev.filter(
+                  (lead) => lead.id !== deletedId
+                )
+              )
+            }
           />
         )}
 
@@ -168,36 +177,89 @@ function AllLeads() {
           />
         )}
 
-        {/* PAGE HEADER */}
-<div className="mt-4 mb-4 sm:mt-5 sm:mb-5">
-  <h1 className="text-2xl sm:text-3xl sm:text-left text-center font-bold text-[var(--color-text)]">
-    Lead Queue
-  </h1>
+        
 
-  <p className="mt-1 text-sm sm:text-base sm:text-left text-center text-[var(--color-text-secondary)]">
-    {filteredLeads.length} lead
-    {filteredLeads.length !== 1 ? "s" : ""} in your outreach queue.
-  </p>
+        {/* PAGE HEADER */}
+<div
+  className="
+    mt-4
+    mb-5
+
+    flex
+    flex-col
+    gap-3
+
+    sm:flex-row
+    sm:items-start
+    sm:justify-between
+  "
+>
+  <div>
+    <h1
+      className="
+        text-2xl
+        sm:text-3xl
+
+        font-bold
+
+        text-[var(--color-text)]
+      "
+    >
+      Lead Queue
+    </h1>
+
+    <p
+      className="
+        mt-1
+        text-sm
+        sm:text-base
+
+        text-[var(--color-text-secondary)]
+      "
+    >
+      {filteredLeads.length} lead
+      {filteredLeads.length !== 1 ? "s" : ""} in your outreach queue.
+    </p>
+  </div>
+
+  <button
+    onClick={() => navigate("/")}
+    className="
+      self-start
+
+      text-sm
+      font-medium
+
+      text-blue-600
+
+      hover:text-blue-700
+      hover:underline
+
+      transition
+    "
+  >
+    ← Back to Review Window
+  </button>
 </div>
 
-{/* SEARCH + FILTERS */}
-<div className="mt-4 mb-5 sm:mt-6 sm:mb-6 space-y-3">
+        {/* SEARCH + FILTERS */}
+        <div className="mt-4 mb-5 sm:mt-6 sm:mb-6 space-y-3">
 
-  {/* SEARCH */}
-  <SearchInput
-    value={search}
-    onChange={setSearch}
-    placeholder='Profile name, eg: "John Smith"'
-  />
+          {/* SEARCH */}
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder='Profile name, eg: "John Smith"'
+          />
 
-  {/* FILTERS (MOBILE FRIENDLY SCROLL + DESKTOP CLEAN) */}
-  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          {/* FILTERS (MOBILE FRIENDLY SCROLL + DESKTOP CLEAN) */}
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
 
-    {filters.map((item) => (
-      <button
-        key={item.value}
-        onClick={() => setFilter(item.value)}
-        className={`
+            {filters.map((item) => (
+              <button
+                key={item.value}
+                onClick={() => setFilter(item.value)}
+                className={`
           whitespace-nowrap
 
           rounded-full
@@ -207,19 +269,18 @@ function AllLeads() {
 
           transition
 
-          ${
-            filter === item.value
-              ? "bg-[var(--color-primary)] text-white"
-              : "bg-white border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-slate-50"
-          }
+          ${filter === item.value
+                    ? "bg-[var(--color-primary)] text-white"
+                    : "bg-white border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-slate-50"
+                  }
         `}
-      >
-        {item.label}
-      </button>
-    ))}
+              >
+                {item.label}
+              </button>
+            ))}
 
-  </div>
-</div>
+          </div>
+        </div>
 
         {/* Divider */}
         <div className="mb-6 h-px bg-[var(--color-border)]" />

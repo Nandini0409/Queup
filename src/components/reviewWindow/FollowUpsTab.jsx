@@ -126,9 +126,15 @@ function FollowUpsTab() {
   ];
 
   const defaultTemplates = {
-    followup1: `Hi {{firstName}},\n\nJust following up on my previous message.`,
-    followup2: `Hi {{firstName}},\n\nWanted to check if you had a chance to see my last message.`,
-    final_followup: `Hi {{firstName}},\n\nJust sending one final follow up.`,
+    followup1: `Hi {{firstName}},
+
+Wanted to follow up on my last message. Let me know if you'd be open to a quick conversation.`,
+    followup2: `Hi {{firstName}},
+
+Just checking in again. Happy to share more details if it would be helpful.`,
+    final_followup: `Hi {{firstName}},
+
+I'll close the loop after this message. If it's not a fit right now, no worries. Wishing you all the best.`,
   };
 
   useEffect(() => {
@@ -274,26 +280,26 @@ function FollowUpsTab() {
     finalLeads.length > 0;
 
   if (loading) {
-  return (
-    <div className="space-y-5">
-      <FollowUpSectionSkeleton />
-      <FollowUpSectionSkeleton />
-      <FollowUpSectionSkeleton />
-    </div>
-  );
-}
+    return (
+      <div className="space-y-5">
+        <FollowUpSectionSkeleton />
+        <FollowUpSectionSkeleton />
+        <FollowUpSectionSkeleton />
+      </div>
+    );
+  }
 
   if (!hasAnyFollowups) {
     return (
       <div
-  className="
+        className="
     rounded-xl
     border border-[var(--color-border)]
     bg-white
     p-5 sm:p-8
     text-center
   "
->
+      >
         <h3 className="mt-3 font-semibold text-[var(--color-text)]">You're all caught up</h3>
         <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
           No follow ups need attention today.
@@ -343,6 +349,13 @@ function FollowUpsTab() {
         }
         onLeadStatusChanged={
           handleLeadStatusChanged
+        }
+        onLeadDeleted={(deletedId) =>
+          setLeads((prev) =>
+            prev.filter(
+              (lead) => lead.id !== deletedId
+            )
+          )
         }
       />}
     </div>
