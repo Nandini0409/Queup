@@ -9,7 +9,7 @@ import {
   useRef,
 } from "react";
 
-import QueupLogo from "../assets/QueupLogo.png";
+import QueupLogo from "/QueupLogo.png";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { supabase } from "../lib/supabase";
 

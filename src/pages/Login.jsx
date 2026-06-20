@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
-import QueupLogo from "../assets/QueupLogo.png";
+import QueupLogo from "/QueupLogo.png"
 import QueupImg from "../assets/QueupImg.png";
+import QueupDemo from "../assets/QueupDemo.mp4"
 
 import {
   ArrowRight,
@@ -228,7 +229,7 @@ function Login() {
               {/* Replace with your actual video */}
               <iframe
                 className="h-full w-full"
-                src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+                src={QueupDemo}
                 title="Queup Demo"
                 allowFullScreen
               />
