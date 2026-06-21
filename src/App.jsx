@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react"
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -60,6 +61,7 @@ function App() {
           />
         </Routes>
       </BrowserRouter>
+      <Analytics />
     </>
   );
 }
