@@ -91,6 +91,14 @@ function RepliedLeadsTab() {
         prev.filter((item) => item.id !== lead.id)
       );
 
+      window.dispatchEvent(
+        new CustomEvent("queup:lead-interested", {
+          detail: {
+            leadId: lead.id,
+          },
+        })
+      );
+
       toast.success(
         `${lead.name} marked as interested`
       );
@@ -241,12 +249,12 @@ function RepliedLeadsTab() {
             handleLeadStatusChanged
           }
           onLeadDeleted={(deletedId) =>
-              setLeads((prev) =>
-                prev.filter(
-                  (lead) => lead.id !== deletedId
-                )
+            setLeads((prev) =>
+              prev.filter(
+                (lead) => lead.id !== deletedId
               )
-            }
+            )
+          }
         />
       )}
     </div>

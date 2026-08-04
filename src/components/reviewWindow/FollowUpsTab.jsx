@@ -137,6 +137,37 @@ Just checking in again. Happy to share more details if it would be helpful.`,
 I'll close the loop after this message. If it's not a fit right now, no worries. Wishing you all the best.`,
   };
 
+
+  useEffect(() => {
+    function handleLeadInterested(event) {
+      const { leadId } = event.detail;
+
+      setFollowup1Leads((prev) =>
+        prev.filter((lead) => lead.id !== leadId)
+      );
+
+      setFollowup2Leads((prev) =>
+        prev.filter((lead) => lead.id !== leadId)
+      );
+
+      setFinalLeads((prev) =>
+        prev.filter((lead) => lead.id !== leadId)
+      );
+    }
+
+    window.addEventListener(
+      "queup:lead-interested",
+      handleLeadInterested
+    );
+
+    return () => {
+      window.removeEventListener(
+        "queup:lead-interested",
+        handleLeadInterested
+      );
+    };
+  }, []);
+
   useEffect(() => {
     if (!user) return;
 
@@ -350,13 +381,19 @@ I'll close the loop after this message. If it's not a fit right now, no worries.
         onLeadStatusChanged={
           handleLeadStatusChanged
         }
-        onLeadDeleted={(deletedId) =>
-          setLeads((prev) =>
-            prev.filter(
-              (lead) => lead.id !== deletedId
-            )
-          )
-        }
+        onLeadDeleted={(deletedId) => {
+          setFollowup1Leads((prev) =>
+            prev.filter((lead) => lead.id !== deletedId)
+          );
+
+          setFollowup2Leads((prev) =>
+            prev.filter((lead) => lead.id !== deletedId)
+          );
+
+          setFinalLeads((prev) =>
+            prev.filter((lead) => lead.id !== deletedId)
+          );
+        }}
       />}
     </div>
   );
