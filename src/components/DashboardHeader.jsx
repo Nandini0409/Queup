@@ -1,5 +1,6 @@
 import {
   Plus,
+  Upload,
   LogOut,
   ChevronDown,
 } from "lucide-react";
@@ -13,7 +14,10 @@ import QueupLogo from "/QueupLogo.png";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { supabase } from "../lib/supabase";
 
-function Header({ onAddLead }) {
+function Header({
+  onAddLead,
+  onImportLeads,
+}) {
   const [isProfileOpen, setIsProfileOpen] =
     useState(false);
 
@@ -113,6 +117,46 @@ function Header({ onAddLead }) {
             min-w-0
           "
         >
+          <button
+            onClick={onImportLeads}
+            className="
+    flex
+    items-center
+    justify-center
+    gap-2
+
+    w-9
+    h-9
+    sm:w-auto
+    sm:h-auto
+
+    rounded-full
+    sm:rounded-xl
+
+    border
+    border-[var(--color-border)]
+
+    bg-white
+    text-[var(--color-primary)]
+
+    transition
+    hover:bg-slate-100
+
+    px-0
+    sm:px-4
+
+    py-0
+    sm:py-2.5
+
+    font-semibold
+  "
+          >
+            <Upload size={16} />
+
+            <span className="hidden sm:inline">
+              Import Leads
+            </span>
+          </button>
           {/* ADD LEAD */}
 
           <button

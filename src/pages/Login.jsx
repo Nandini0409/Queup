@@ -41,8 +41,8 @@ function Login() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       {/* NAVBAR */}
-<header
-  className="
+      <header
+        className="
     sticky
     top-0
     z-20
@@ -51,9 +51,9 @@ function Login() {
     bg-white/70
     backdrop-blur-xl
   "
->
-  <div
-    className="
+      >
+        <div
+          className="
       mx-auto
       flex
       max-w-7xl
@@ -63,21 +63,21 @@ function Login() {
       py-3
       sm:px-6
     "
-  >
-    {/* Logo */}
-    <div className="flex items-center gap-3">
-      <img
-        src={QueupLogo}
-        alt="Queup"
-        className="h-12 w-auto"
-      />
+        >
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <img
+              src={QueupLogo}
+              alt="Queup"
+              className="h-12 w-auto"
+            />
 
-    </div>
+          </div>
 
-    {/* CTA */}
-    <button
-      onClick={handleGoogleLogin}
-      className="
+          {/* CTA */}
+          <button
+            onClick={handleGoogleLogin}
+            className="
         inline-flex
         items-center
         justify-center
@@ -93,11 +93,11 @@ function Login() {
         hover:-translate-y-0.5
         hover:shadow-md
       "
-    >
-      Get Started
-    </button>
-  </div>
-</header>
+          >
+            Get Started
+          </button>
+        </div>
+      </header>
       <main>
         {/* HERO */}
         <section className="relative overflow-hidden">

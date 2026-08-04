@@ -1,50 +1,123 @@
 import { supabase } from "../lib/supabase"
 import { LEAD_STATUS } from "../constants/leadStatus"
 
+
+export async function importLeads(userId, leads) {
+  const leadsToInsert = leads.map((lead) => ({
+    ...lead,
+    user_id: userId,
+  }));
+
+  const { error } = await supabase
+    .from("leads")
+    .insert(leadsToInsert);
+
+  if (error) throw error;
+}
+
+
+
 async function updateLeadStatus(
   leadId,
   status,
-  nextFollowupDate = null
+  next_follow_up_date = null,
+  next_follow_up_action = null
 ) {
+  const today = new Date()
+    .toISOString()
+    .split("T")[0];
+
   const { data, error } = await supabase
     .from("leads")
     .update({
       status,
-      next_followup_date: nextFollowupDate,
+      last_contact_date: today,
+      next_follow_up_date: next_follow_up_date,
+      next_follow_up_action: next_follow_up_action,
     })
     .eq("id", leadId)
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
+  if (error) throw error;
 
-  return data
+  return data;
 }
+
+
+export async function updateLead(
+  leadId,
+  leadData
+) {
+  const { data, error } = await supabase
+    .from("leads")
+    .update({
+      name: leadData.name.trim(),
+      profile_link: leadData.profile_link.trim(),
+      profile_heading: leadData.profile_heading.trim(),
+      business_type: leadData.business_type.trim(),
+      country: leadData.country.trim(),
+      followers_count: leadData.followers_count,
+      connections_count: leadData.connections_count,
+    })
+    .eq("id", leadId)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
 
 export async function createLead(
   userId,
   leadData
 ) {
+  const today = new Date()
+    .toISOString()
+    .split("T")[0];
+
   const { data, error } = await supabase
     .from("leads")
     .insert([
       {
         user_id: userId,
-        name: leadData.name,
-        profile_url: leadData.profileUrl,
-        notes: leadData.notes,
-        status:
-          LEAD_STATUS.REQUEST_SENT,
-        next_followup_date: null,
+        name: leadData.name.trim(),
+        profile_link:
+          leadData.profile_link.trim(),
+        profile_heading:
+          leadData.profile_heading.trim(),
+        business_type:
+          leadData.business_type.trim(),
+        country:
+          leadData.country.trim(),
+        followers_count:
+          leadData.followers_count,
+        connections_count:
+          leadData.connections_count,
+        remarks:
+          leadData.remarks.trim(),
+
+        // Outreach
+        status: LEAD_STATUS.REQUEST_SENT,
+        connection_request_date: today,
+        last_contact_date: today,
+
+        // No follow-up scheduled until the connection is accepted
+        next_follow_up_date: null,
+        next_follow_up_action:
+          "Wait for Connection Acceptance",
       },
     ])
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
+  if (error) throw error;
 
-  return data
+  return data;
 }
+
 
 export async function getLeads(userId) {
   const { data, error } = await supabase
@@ -122,22 +195,22 @@ export async function deleteLead(leadId) {
 
 
 
-export async function updateLeadNotes(
+export async function updateLeadRemarks(
   leadId,
-  notes
+  remarks
 ) {
   const { data, error } = await supabase
     .from("leads")
     .update({
-      notes,
+      remarks,
     })
     .eq("id", leadId)
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
+  if (error) throw error;
 
-  return data
+  return data;
 }
 
 
@@ -197,7 +270,7 @@ export async function getFollowUpsDueToday(
     .select("*")
     .eq("user_id", userId)
     .lte(
-      "next_followup_date",
+      "next_follow_up_date",
       today
     )
     .in("status", [
@@ -220,7 +293,7 @@ export async function markLeadInterested(
   )
 }
 
-export async function markCompleted(
+export async function markLeadCompleted(
   leadId
 ) {
   return updateLeadStatus(
@@ -232,108 +305,111 @@ export async function markCompleted(
 export async function markInitialMessageSent(
   leadId
 ) {
-  const lead =
-  await getLeadById(leadId);
+  const lead = await getLeadById(leadId);
 
-if (
-  lead.status !==
-  LEAD_STATUS.REQUEST_SENT
-) {
-  throw new Error(
-    "Lead is not eligible for Initial Message"
-  );
-}
+  if (
+    lead.status !==
+    LEAD_STATUS.REQUEST_SENT
+  ) {
+    throw new Error(
+      "Lead is not eligible for Initial Message."
+    );
+  }
 
-
-  const nextDate = new Date()
+  const nextDate = new Date();
 
   nextDate.setDate(
-    nextDate.getDate() + 2
-  )
+    nextDate.getDate() + 3
+  );
 
   return updateLeadStatus(
     leadId,
     LEAD_STATUS.INITIAL_MESSAGE_SENT,
-    nextDate.toISOString()
-  )
+    nextDate
+      .toISOString()
+      .split("T")[0],
+    "Send Follow Up 1"
+  );
 }
 
 export async function markFollowup1Sent(
   leadId
 ) {
-  const lead =
-    await getLeadById(leadId);
+  const lead = await getLeadById(leadId);
 
   if (
     lead.status !==
     LEAD_STATUS.INITIAL_MESSAGE_SENT
   ) {
     throw new Error(
-      "Lead is not eligible for Follow Up 1"
+      "Lead is not eligible for Follow Up 1."
     );
   }
-  const nextDate = new Date()
+
+  const nextDate = new Date();
 
   nextDate.setDate(
-    nextDate.getDate() + 3
-  )
+    nextDate.getDate() + 7
+  );
 
   return updateLeadStatus(
     leadId,
     LEAD_STATUS.FOLLOW_UP_1_SENT,
     nextDate
       .toISOString()
-      .split("T")[0]
-  )
+      .split("T")[0],
+    "Send Follow Up 2"
+  );
 }
 
 export async function markFollowup2Sent(
   leadId
 ) {
-  const lead =
-    await getLeadById(leadId);
+  const lead = await getLeadById(leadId);
 
   if (
     lead.status !==
     LEAD_STATUS.FOLLOW_UP_1_SENT
   ) {
     throw new Error(
-      "Lead is not eligible for Follow Up 2"
+      "Lead is not eligible for Follow Up 2."
     );
   }
 
-  const nextDate = new Date()
+  const nextDate = new Date();
 
   nextDate.setDate(
-    nextDate.getDate() + 3
-  )
+    nextDate.getDate() + 7
+  );
 
   return updateLeadStatus(
     leadId,
     LEAD_STATUS.FOLLOW_UP_2_SENT,
     nextDate
       .toISOString()
-      .split("T")[0]
-  )
+      .split("T")[0],
+    "Send Final Follow Up"
+  );
 }
 
 export async function markFinalFollowupSent(
   leadId
 ) {
-  const lead =
-    await getLeadById(leadId);
+  const lead = await getLeadById(leadId);
 
   if (
     lead.status !==
     LEAD_STATUS.FOLLOW_UP_2_SENT
   ) {
     throw new Error(
-      "Lead is not eligible for Final Follow Up"
+      "Lead is not eligible for Final Follow Up."
     );
   }
 
   return updateLeadStatus(
     leadId,
-    LEAD_STATUS.FINAL_FOLLOW_UP_SENT
-  )
+    LEAD_STATUS.FINAL_FOLLOW_UP_SENT,
+    null,
+    "Mark as Completed"
+  );
 }

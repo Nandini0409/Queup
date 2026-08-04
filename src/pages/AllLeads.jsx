@@ -11,9 +11,10 @@ import AddLeadModal from "../components/AddLeadModal";
 import LeadCard from "../components/LeadCard";
 import LeadStats from "../components/LeadStats";
 import SearchInput from "../components/SearchInput";
-import Header from "../components/Header";
+import Header from "../components/DashboardHeader";
+import ImportLeadsModal from "../components/ImportLeadsModal";
 
-const LEADS_PER_PAGE = 10;
+const LEADS_PER_PAGE = 50;
 
 function AllLeads() {
   const user = useCurrentUser();
@@ -23,16 +24,23 @@ function AllLeads() {
   const [loading, setLoading] = useState(true);
   const [selectedLead, setSelectedLead] = useState(null);
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const activeCount = leads.filter(
+  const awaitingAcceptanceCount = leads.filter(
     (lead) =>
-      lead.status !==
-      LEAD_STATUS.INTERESTED &&
-      lead.status !==
-      LEAD_STATUS.FINAL_FOLLOW_UP_SENT
+      lead.status === LEAD_STATUS.REQUEST_SENT
+  ).length;
+
+  const inOutreachCount = leads.filter((lead) =>
+    [
+      LEAD_STATUS.INITIAL_MESSAGE_SENT,
+      LEAD_STATUS.FOLLOW_UP_1_SENT,
+      LEAD_STATUS.FOLLOW_UP_2_SENT,
+      LEAD_STATUS.FINAL_FOLLOW_UP_SENT,
+    ].includes(lead.status)
   ).length;
 
   const interestedCount = leads.filter(
@@ -40,12 +48,10 @@ function AllLeads() {
       lead.status === LEAD_STATUS.INTERESTED
   ).length;
 
-  const completedCount =
-    leads.filter(
-      (lead) =>
-        lead.status ===
-        LEAD_STATUS.FINAL_FOLLOW_UP_SENT
-    ).length;
+  const completedCount = leads.filter(
+    (lead) =>
+      lead.status === LEAD_STATUS.COMPLETED
+  ).length;
 
   async function loadLeads() {
     if (!user) return;
@@ -85,25 +91,28 @@ function AllLeads() {
         return false;
 
       switch (filter) {
-        case "active":
+
+        case "awaiting":
           return (
-            lead.status !==
-            LEAD_STATUS.INTERESTED &&
-            lead.status !==
-            LEAD_STATUS.FINAL_FOLLOW_UP_SENT
+            lead.status === LEAD_STATUS.REQUEST_SENT
           );
+
+        case "outreach":
+          return [
+            LEAD_STATUS.INITIAL_MESSAGE_SENT,
+            LEAD_STATUS.FOLLOW_UP_1_SENT,
+            LEAD_STATUS.FOLLOW_UP_2_SENT,
+            LEAD_STATUS.FINAL_FOLLOW_UP_SENT,
+          ].includes(lead.status);
 
         case "interested":
           return (
-            lead.status ===
-            LEAD_STATUS.INTERESTED
+            lead.status === LEAD_STATUS.INTERESTED
           );
 
         case "completed":
           return (
-            lead.status ===
-            LEAD_STATUS
-              .FINAL_FOLLOW_UP_SENT
+            lead.status === LEAD_STATUS.COMPLETED
           );
 
         default:
@@ -125,23 +134,30 @@ function AllLeads() {
 
   const filters = [
     {
-      value: "active",
-      label: `Active (${activeCount})`,
+      value: "all",
+      label: `All (${leads.length})`,
     },
+
+    {
+      value: "awaiting",
+      label: `Awaiting Acceptance (${awaitingAcceptanceCount})`,
+    },
+
+    {
+      value: "outreach",
+      label: `In Outreach (${inOutreachCount})`,
+    },
+
     {
       value: "interested",
       label: `Interested (${interestedCount})`,
     },
+
     {
       value: "completed",
       label: `Completed (${completedCount})`,
     },
-    {
-      value: "all",
-      label: `All (${leads.length})`,
-    },
   ];
-
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
@@ -160,12 +176,27 @@ function AllLeads() {
                 )
               )
             }
+            mode="add"
           />
         )}
 
         <Header
           onAddLead={() => setIsAddLeadOpen(true)}
+          onImportLeads={() => setIsImportOpen(true)}
         />
+
+        {
+          isImportOpen && (
+            <ImportLeadsModal
+              userId={user.id}
+              onClose={() => setIsImportOpen(false)}
+              onImportSuccess={() => {
+                setIsImportOpen(false);
+                loadLeads();
+              }}
+            />
+          )
+        }
 
         {isAddLeadOpen && user && (
           <AddLeadModal
@@ -177,11 +208,11 @@ function AllLeads() {
           />
         )}
 
-        
+
 
         {/* PAGE HEADER */}
-<div
-  className="
+        <div
+          className="
     mt-4
     mb-5
 
@@ -193,10 +224,10 @@ function AllLeads() {
     sm:items-start
     sm:justify-between
   "
->
-  <div>
-    <h1
-      className="
+        >
+          <div>
+            <h1
+              className="
         text-2xl
         sm:text-3xl
 
@@ -204,27 +235,27 @@ function AllLeads() {
 
         text-[var(--color-text)]
       "
-    >
-      Lead Queue
-    </h1>
+            >
+              Lead Queue
+            </h1>
 
-    <p
-      className="
+            <p
+              className="
         mt-1
         text-sm
         sm:text-base
 
         text-[var(--color-text-secondary)]
       "
-    >
-      {filteredLeads.length} lead
-      {filteredLeads.length !== 1 ? "s" : ""} in your outreach queue.
-    </p>
-  </div>
+            >
+              {filteredLeads.length} lead
+              {filteredLeads.length !== 1 ? "s" : ""} in your outreach queue.
+            </p>
+          </div>
 
-  <button
-    onClick={() => navigate("/")}
-    className="
+          <button
+            onClick={() => navigate("/")}
+            className="
       self-start
 
       text-sm
@@ -237,10 +268,10 @@ function AllLeads() {
 
       transition
     "
-  >
-    ← Back to Review Window
-  </button>
-</div>
+          >
+            ← Back to Review Window
+          </button>
+        </div>
 
         {/* SEARCH + FILTERS */}
         <div className="mt-4 mb-5 sm:mt-6 sm:mb-6 space-y-3">

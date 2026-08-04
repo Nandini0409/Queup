@@ -1,19 +1,22 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-import Header from "../components/Header";
+import Header from "../components/DashboardHeader";
 import ReviewWindow from "../components/reviewWindow/ReviewWindow";
 import AddLeadModal from "../components/AddLeadModal";
+import ImportLeadsModal from "../components/ImportLeadsModal";
 import FirstTimeOnboarding from "../components/FirstTimeOnboarding";
 
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { getLeadCount } from "../services/leads";
 
 function Dashboard() {
+  console.log("hii in the dashboard")
   const navigate = useNavigate();
   const user = useCurrentUser();
 
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   const [totalLeads, setTotalLeads] = useState(null);
   const [isLoadingLeads, setIsLoadingLeads] = useState(true);
@@ -52,7 +55,23 @@ function Dashboard() {
       <div className="mx-auto max-w-4xl px-3 sm:px-6">
 
         {/* HEADER */}
-        <Header onAddLead={() => setIsAddLeadOpen(true)} />
+        <Header
+          onAddLead={() => setIsAddLeadOpen(true)}
+          onImportLeads={() => setIsImportOpen(true)}
+        />
+
+        {
+          isImportOpen && (
+            <ImportLeadsModal
+              userId={user.id}
+              onClose={() => setIsImportOpen(false)}
+              onImportSuccess={() => {
+                setIsImportOpen(false);
+                loadLeads();
+              }}
+            />
+          )
+        }
 
         {/* ADD LEAD MODAL */}
         {isAddLeadOpen && user && (
@@ -65,6 +84,7 @@ function Dashboard() {
                 prev === null ? 1 : prev + 1
               );
             }}
+            mode="add"
           />
         )}
 
