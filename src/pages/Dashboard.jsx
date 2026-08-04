@@ -27,6 +27,23 @@ function Dashboard() {
     setIsLoadingLeads(true);
   }, [user]);
 
+  async function loadLeads() {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      const data =
+        await getLeads(user.id);
+
+      setLeads(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // Fetch lead count
   useEffect(() => {
     async function fetchLeads() {
