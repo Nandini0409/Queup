@@ -96,7 +96,6 @@ function Dashboard() {
             userId={user.id}
             onClose={() => setIsAddLeadOpen(false)}
             onLeadCreated={() => {
-              setIsAddLeadOpen(false);
               setTotalLeads((prev) =>
                 prev === null ? 1 : prev + 1
               );
