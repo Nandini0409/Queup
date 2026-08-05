@@ -1,9 +1,25 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { X, UserPlus } from "lucide-react";
 
 import { useUpdateLead } from "../hooks/useUpdateLead";
 import { useAddLead } from "../hooks/useAddLead";
 import { validateLead, isLeadFormValid } from "../utils/Validity";
+
+
+const getInitialFormData = () => ({
+  name: "",
+  profile_link: "",
+  profile_heading: "",
+  country: "",
+  business_type: "",
+  connections_count: "",
+  followers_count: "",
+  connection_request_date:
+    new Date().toISOString().split("T")[0],
+  remarks: "",
+});
+
+
 
 
 function AddLeadModal({
@@ -13,23 +29,31 @@ function AddLeadModal({
   onLeadCreated,
   mode = "add"
 }) {
+
   const isEdit = mode === "edit";
-  const [formData, setFormData] = useState({
-    name: lead?.name ?? "",
-    profile_link: lead?.profile_link ?? "",
-    profile_heading: lead?.profile_heading ?? "",
-    country: lead?.country ?? "",
-    business_type: lead?.business_type ?? "",
-    connections_count: lead?.connections_count ?? "",
-    followers_count: lead?.followers_count ?? "",
-    connection_request_date:
-      lead?.connection_request_date ??
-      new Date().toISOString().split("T")[0],
-    remarks: lead?.remarks ?? "",
-  });
+  const [formData, setFormData] = useState(
+    lead
+      ? {
+        name: lead.name ?? "",
+        profile_link: lead.profile_link ?? "",
+        profile_heading: lead.profile_heading ?? "",
+        country: lead.country ?? "",
+        business_type: lead.business_type ?? "",
+        connections_count: lead.connections_count ?? "",
+        followers_count: lead.followers_count ?? "",
+        connection_request_date:
+          lead.connection_request_date ??
+          new Date().toISOString().split("T")[0],
+        remarks: lead.remarks ?? "",
+      }
+      : getInitialFormData()
+  );
+
+
+
 
   const [errors, setErrors] = useState({});
-
+  const nameInputRef = useRef(null);
   const { addLead, loading: adding } = useAddLead();
   const { editLead, loading: editing } = useUpdateLead();
 
@@ -57,6 +81,20 @@ function AddLeadModal({
 
 
   const isFormValid = isLeadFormValid(formData);
+
+  function handleKeyDown(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+
+      if (!loading && isFormValid) {
+        e.currentTarget.requestSubmit();
+      }
+    }
+  }
+
+
+
+
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -100,7 +138,17 @@ function AddLeadModal({
       }
 
       onLeadCreated?.(savedLead);
-      onClose();
+
+      if (isEdit) {
+        onClose();
+        return;
+      }
+
+      setFormData(getInitialFormData());
+      setErrors({});
+      requestAnimationFrame(() => {
+        nameInputRef.current?.focus();
+      });
     } catch (err) {
       console.error(err);
     }
@@ -159,6 +207,7 @@ function AddLeadModal({
         {/* FORM */}
         <form
           onSubmit={handleSubmit}
+          onKeyDown={handleKeyDown}
           className="p-4 sm:p-7 space-y-6"
         >
           {/* =========================
@@ -184,6 +233,7 @@ function AddLeadModal({
 
               <input
                 autoFocus
+                ref={nameInputRef}
                 value={formData.name}
                 onChange={(e) =>
                   handleInputChange("name", e.target.value)
@@ -457,7 +507,20 @@ function AddLeadModal({
 
           {/* FOOTER */}
           <div
-            className="flex flex-col-reverse gap-3 pt-4 border-t border-[var(--color-border)] sm:flex-row sm:justify-end"
+            className="
+    sticky
+    bottom-0
+    bg-white
+    border-t
+    border-[var(--color-border)]
+    px-7
+    py-4
+    flex
+    flex-col-reverse
+    gap-3
+    sm:flex-row
+    sm:justify-end
+"
           >
             <button
               type="button"
