@@ -14,8 +14,8 @@ import toast from "react-hot-toast";
 
 import StatusBadge from "../StatusBadge";
 
-import { LEAD_STATUS } from "../../constants/leadStatus";
-import { getLeadSummary } from "../../utils/getLeadSummary";
+import { LEAD_STATUS } from "../../../../constants/leadStatus";
+import { getLeadSummary } from "../../../../utils/getLeadSummary";
 
 
 import { markLeadInterested, markLeadCompleted } from "../../services/leads";

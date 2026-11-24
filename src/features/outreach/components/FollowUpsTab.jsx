@@ -2,25 +2,25 @@ import { useEffect, useState } from "react";
 
 import toast from "react-hot-toast";
 
-import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { useCurrentUser } from "../../auth/hooks/useCurrentUser";
 
-import LeadDrawer from "../drawer/LeadDrawer";
+import LeadDrawer from "../../leads/components/drawer/LeadDrawer";
 import FollowUpSection from "./FollowupSection";
-import { LEAD_STATUS } from "../../constants/leadStatus";
+import { LEAD_STATUS } from "../../../constants/leadStatus";
 
 import {
   getFollowUpsDueToday,
   markFollowup1Sent,
   markFollowup2Sent,
   markFinalFollowupSent,
-} from "../../services/leads";
+} from "../../leads/services/leads";
 
-import { createActivity } from "../../services/activities";
+import { createActivity } from "../../leads/services/activities";
 
 import {
   getTemplate,
   saveTemplate,
-} from "../../services/templates";
+} from "../services/templates";
 
 
 

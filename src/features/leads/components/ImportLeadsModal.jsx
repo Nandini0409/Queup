@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, Upload } from "lucide-react";
 import * as XLSX from "xlsx";
-import { mapImportedLead } from "../utils/excelImportHelpers";
+import { mapImportedLead } from "../../../utils/excelImportHelpers";
 import { importLeads } from "../services/leads";
 import toast from "react-hot-toast"
 

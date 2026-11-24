@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { useCurrentUser } from "../../auth/hooks/useCurrentUser";
 
-import SearchInput from "../SearchInput";
-import LeadDrawer from "../drawer/LeadDrawer";
-import LeadRow from "../LeadRow";
-import TemplatePanel from "../TemplatePanel";
+import SearchInput from "../../../components/ui/SearchInput";
+import LeadDrawer from "../../leads/components/drawer/LeadDrawer";
+import LeadRow from "../../leads/components/LeadRow";
+import TemplatePanel from "./TemplatePanel";
 
 import {
   searchLeadForAcceptance,
   markInitialMessageSent,
-} from "../../services/leads";
+} from "../../leads/services/leads";
 
-import { createActivity } from "../../services/activities";
+import { createActivity } from "../../leads/services/activities";
 
 import {
   getTemplate,
   saveTemplate,
-} from "../../services/templates";
+} from "../services/templates";
 
 
 

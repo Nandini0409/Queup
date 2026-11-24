@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { useCurrentUser } from "../../auth/hooks/useCurrentUser";
 
-import SearchInput from "../SearchInput";
-import LeadDrawer from "../drawer/LeadDrawer";
-import LeadRow from "../LeadRow";
+import SearchInput from "../../../components/ui/SearchInput";
+import LeadDrawer from "../../leads/components/drawer/LeadDrawer";
+import LeadRow from "../../leads/components/LeadRow";
 
 import toast from "react-hot-toast";
 
 import {
   searchRepliedLead,
   markLeadInterested,
-} from "../../services/leads";
+} from "../../leads/services/leads";
 
-import { createActivity } from "../../services/activities";
+import { createActivity } from "../../leads/services/activities";
 
 function LeadRowSkeleton() {
   return (

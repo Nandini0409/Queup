@@ -1,4 +1,4 @@
-import { getDueInfo } from "./getLeadActionInfo";
+import { getDueInfo } from "./../features/leads/utils/getLeadActionInfo";
 
 export function getLeadSummary(lead) {
   const dueInfo = getDueInfo(lead.next_follow_up_date);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useCurrentUser } from "../../hooks/useCurrentUser";
-import { getTodaysLeadsCount } from "../../services/leads";
+import { useCurrentUser } from "../../auth/hooks/useCurrentUser";
+import { getTodaysLeadsCount } from "../../leads/services/leads";
 
 function DailyProspectingCard({ refreshKey }) {
   const user = useCurrentUser();

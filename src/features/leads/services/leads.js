@@ -1,5 +1,5 @@
-import { supabase } from "../lib/supabase"
-import { LEAD_STATUS } from "../constants/leadStatus"
+import { supabase } from "../../../lib/supabase"
+import { LEAD_STATUS } from "../../../constants/leadStatus"
 
 
 export async function importLeads(userId, leads) {

@@ -1,7 +1,7 @@
-import { supabase } from "../lib/supabase";
-import QueupLogo from "/QueupLogo.png"
-import QueupImg from "../assets/QueupImg.png";
-import QueupDemo from "../assets/QueupDemo.mp4"
+import { supabase } from "../../../lib/supabase";
+import QueupLogo from "./../../../assets/logo.png"
+import QueupImg from "./../../../assets/QueupImg.png";
+import QueupDemo from "./../../../assets/QueupDemo.mp4"
 
 import {
   ArrowRight,

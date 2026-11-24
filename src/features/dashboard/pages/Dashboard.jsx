@@ -2,13 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import Header from "../components/DashboardHeader";
-import ReviewWindow from "../components/reviewWindow/ReviewWindow";
-import AddLeadModal from "../components/AddLeadModal";
-import ImportLeadsModal from "../components/ImportLeadsModal";
+import ReviewWindow from "../../outreach/components/ReviewWindow";
+import AddLeadModal from "../../leads/components/AddLeadModal";
+import ImportLeadsModal from "../../leads/components/ImportLeadsModal";
 import FirstTimeOnboarding from "../components/FirstTimeOnboarding";
 
-import { useCurrentUser } from "../hooks/useCurrentUser";
-import { getLeadCount } from "../services/leads";
+import { useCurrentUser } from "../../auth/hooks/useCurrentUser";
+import { getLeadCount } from "../../leads/services/leads";
 
 function Dashboard() {
   console.log("hii in the dashboard")

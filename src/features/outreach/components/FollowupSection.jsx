@@ -1,6 +1,6 @@
 import { useState } from "react";
-import LeadRow from "../LeadRow";
-import TemplatePanel from "../TemplatePanel";
+import LeadRow from "../../leads/components/LeadRow";
+import TemplatePanel from "./TemplatePanel";
 
 function FollowUpSection({
   sectionId,   // ✅ FIX

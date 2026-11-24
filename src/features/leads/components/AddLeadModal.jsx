@@ -3,7 +3,7 @@ import { X, UserPlus } from "lucide-react";
 
 import { useUpdateLead } from "../hooks/useUpdateLead";
 import { useAddLead } from "../hooks/useAddLead";
-import { validateLead, isLeadFormValid } from "../utils/Validity";
+import { validateLead, isLeadFormValid } from "../../../utils/Validity";
 
 
 const getInitialFormData = () => ({

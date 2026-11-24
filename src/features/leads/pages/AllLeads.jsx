@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 
-import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useCurrentUser } from "../../auth/hooks/useCurrentUser";
 
 import { getLeads } from "../services/leads";
-import { LEAD_STATUS } from "../constants/leadStatus";
+import { LEAD_STATUS } from "../../../constants/leadStatus";
 import { useNavigate } from "react-router-dom";
 
 import LeadDrawer from "../components/drawer/LeadDrawer";
 import AddLeadModal from "../components/AddLeadModal";
 import LeadCard from "../components/LeadCard";
 import LeadStats from "../components/LeadStats";
-import SearchInput from "../components/SearchInput";
-import Header from "../components/DashboardHeader";
+
+import Header from "../../dashboard/components/DashboardHeader";
 import ImportLeadsModal from "../components/ImportLeadsModal";
 
 const LEADS_PER_PAGE = 50;

@@ -3,9 +3,9 @@ import { supabase } from "./lib/supabase";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react"
 
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import AllLeads from "./pages/AllLeads";
+import Login from "./features/auth/pages/Login"
+import Dashboard from "./features/dashboard/pages/Dashboard";
+import AllLeads from "./features/leads/pages/AllLeads";
 import { Toaster } from "react-hot-toast";
 
 function App() {

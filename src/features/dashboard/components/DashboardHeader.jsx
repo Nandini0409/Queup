@@ -10,9 +10,9 @@ import {
   useRef,
 } from "react";
 
-import QueupLogo from "/QueupLogo.png";
-import { useCurrentUser } from "../hooks/useCurrentUser";
-import { supabase } from "../lib/supabase";
+import QueupLogo from "../../../assets/logo.png";
+import { useCurrentUser } from "../../auth/hooks/useCurrentUser";
+import { supabase } from "../../../lib/supabase";
 
 function Header({
   onAddLead,
